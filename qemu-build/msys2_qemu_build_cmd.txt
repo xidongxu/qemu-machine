@@ -1,7 +1,18 @@
-# 管理员权限打开终端
+# Win11本地构建QEMU二进制文件步骤
+
+## 安装 MSYS2
+https://www.msys2.org/中，下载：msys2-x86_64-20240113.exe 文件：https://github.com/msys2/msys2-installer/releases/download/2024-01-13/msys2-x86_64-20240113.exe
+
+## 配置 MSYS2 源：
+进入安装目录：C:\msys64\etc\pacman.d （这里安装目录以：C:\msys64 为例）
+在文件mirrorlist.msys的前面插入： Server = http://mirrors.ustc.edu.cn/msys2/msys/$arch
+在文件mirrorlist.mingw32的前面插入： Server = http://mirrors.ustc.edu.cn/msys2/mingw/i686
+在文件mirrorlist.mingw64的前面插入： Server = http://mirrors.ustc.edu.cn/msys2/mingw/x86_64
+
+## 管理员权限打开终端
 MSYS2 MINGW64
 
-# 安装 MSYS2 需要安装的依赖库
+## 安装 MSYS2 需要安装的依赖库
 pacman -Syu
 pacman -Su
 
@@ -77,26 +88,24 @@ pacman -Sy mingw-w64-x86_64-meson mingw-w64-x86_64-ninja \
            mingw-w64-x86_64-zlib \
            mingw-w64-x86_64-zstd
 
-# 进入源码目录
+## 进入工程目录（这里以：C:\Users\xidon\code\github\qemu-machine\ 为例）
 cd /C/Users/xidon/code/github/qemu-machine/
 
-# 下载源码
+## 下载解压源码（如果需要其它版本，请使用以下命令自行下载解压，例如9.0.0版本，使用以下命令，如果使用9.0.0的版本，无需执行以下2条指令）
 wget https://download.qemu.org/qemu-9.0.0.tar.xz
-
-# 解压源码
 tar xvJf qemu-9.0.0.tar.xz
 
-# 进入源码目录
+## 进入源码目录（绝对路径为：C:\Users\xidon\code\github\qemu-machine\qemu-9.0.0\）
 cd qemu-9.0.0
 
-# 配置工程
+## 配置源码工程（这里以：C:\Users\xidon\program\QEMU-MACHINE\ 为例）
 ./configure --prefix=/C/Users/xidon/program/QEMU-MACHINE
  
-# 编译工程
+## 编译源码工程
 make -j6
 
-# 安装工程
+## 安装二进制文件
 make install
 
-# 安装目录
+## 安装的二进制文件所在目录
 C:\Users\xidon\program\QEMU-MACHINE
