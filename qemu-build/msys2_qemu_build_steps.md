@@ -1,7 +1,10 @@
 # Win11本地构建QEMU二进制文件步骤
 
 ## 安装 MSYS2
-https://www.msys2.org/中，下载：msys2-x86_64-20240113.exe 文件：https://github.com/msys2/msys2-installer/releases/download/2024-01-13/msys2-x86_64-20240113.exe
+安装：qemu-packs/msys2-x86_64-20240113.exe
+最新版本请在以下万盏寻找（这里以：msys2-x86_64-20240113.exe 文件为例）：
+https://www.msys2.org/中，下载：msys2-x86_64-20240113.exe 
+链接：https://github.com/msys2/msys2-installer/releases/download/2024-01-13/msys2-x86_64-20240113.exe
 
 ## 配置 MSYS2 源：
 进入安装目录：C:\msys64\etc\pacman.d （这里安装目录以：C:\msys64 为例）
