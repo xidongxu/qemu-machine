@@ -1,28 +1,62 @@
 # Win11本地构建QEMU二进制文件步骤
 
-## 安装 MSYS2
+
+
+## 1. 安装 MSYS2 
+
 安装：qemu-packs/msys2-x86_64-20240113.exe
-最新版本请在以下万盏寻找（这里以：msys2-x86_64-20240113.exe 文件为例）：
-https://www.msys2.org/中，下载：msys2-x86_64-20240113.exe 
+
+> 最新版本请参考下面的安装方式，这里以：msys2-x86_64-20240113.exe 文件为例：
+
+打开网页：https://www.msys2.org/中，找到然后下载：msys2-x86_64-20240113.exe 文件 
 链接：https://github.com/msys2/msys2-installer/releases/download/2024-01-13/msys2-x86_64-20240113.exe
 
-## 配置 MSYS2 源：
-进入安装目录：C:\msys64\etc\pacman.d （这里安装目录以：C:\msys64 为例）
-在文件mirrorlist.msys的前面插入： Server = http://mirrors.ustc.edu.cn/msys2/msys/$arch
-在文件mirrorlist.mingw32的前面插入： Server = http://mirrors.ustc.edu.cn/msys2/mingw/i686
-在文件mirrorlist.mingw64的前面插入： Server = http://mirrors.ustc.edu.cn/msys2/mingw/x86_64
 
-## 管理员权限打开终端
+
+## 2. 配置 MSYS2 
+
+> 这里安装目录：C:\msys64 为例，进入安装目录：C:\msys64\etc\pacman.d 
+
+- 在文件 mirrorlist.msys 的前面插入
+
+  ```shell
+  Server = http://mirrors.ustc.edu.cn/msys2/msys/$arch
+  ```
+
+- 在文件 mirrorlist.mingw32 的前面插入
+
+  ```shell
+  Server = http://mirrors.ustc.edu.cn/msys2/mingw/i686
+  ```
+
+- 在文件 mirrorlist.mingw64 的前面插入
+
+  ```shell
+  Server = http://mirrors.ustc.edu.cn/msys2/mingw/x86_64
+  ```
+
+
+
+## 3. 管理员权限打开 MSYS2 终端
+
 MSYS2 MINGW64
 
-## 安装 MSYS2 需要安装的依赖库
+
+
+## 4. 在 MSYS2 安装 qemu 依赖库
+
+```shell
 pacman -Syu
 pacman -Su
+```
 
+```shell
 pacman -S base-devel mingw-w64-x86_64-toolchain git python ninja
 pacman -S mingw-w64-x86_64-glib2 mingw-w64-x86_64-pixman python-setuptools
 pacman -S mingw-w64-x86_64-gtk3 mingw-w64-x86_64-SDL2 mingw-w64-x86_64-libslirp
+```
 
+```shell
 pacman -Sy mingw-w64-x86_64-meson mingw-w64-x86_64-ninja \
            mingw-w64-x86_64-python \
            mingw-w64-x86_64-python-sphinx \
@@ -90,25 +124,98 @@ pacman -Sy mingw-w64-x86_64-meson mingw-w64-x86_64-ninja \
            mingw-w64-x86_64-xz \
            mingw-w64-x86_64-zlib \
            mingw-w64-x86_64-zstd
+```
 
-## 进入工程目录（这里以：C:\Users\xidon\code\github\qemu-machine\ 为例）
-cd /C/Users/xidon/code/github/qemu-machine/
 
-## 下载解压源码（如果需要其它版本，请使用以下命令自行下载解压，例如9.0.0版本，使用以下命令，如果使用9.0.0的版本，无需执行以下2条指令）
+
+## 5. 拉取最新工程
+
+```shell
+https://github.com/xidongxu/qemu-machine.git
+cd ./qemu-machine
+```
+
+
+
+## 6. 选择 qemu 版本
+
+### 方式1：使用工程自带版本
+
+> 工程自带的qemu版本为 qemu-9.0.0，无需执行其它操作
+
+### 方式2：下载源码压缩文件
+
+> 如果需要其它版本，请使用以下命令自行下载解压，例如9.0.0版本，使用以下命令：
+
+```shell
 wget https://download.qemu.org/qemu-9.0.0.tar.xz
 tar xvJf qemu-9.0.0.tar.xz
+```
 
-## 进入源码目录（绝对路径为：C:\Users\xidon\code\github\qemu-machine\qemu-9.0.0\）
-cd qemu-9.0.0
+### 方式3： 使用官方最新版本
 
-## 配置源码工程（这里以：C:\Users\xidon\program\QEMU-MACHINE\ 为例）
-./configure --prefix=/C/Users/xidon/program/QEMU-MACHINE
- 
-## 编译源码工程
-make -j6
+> 使用官方最新版本，请使用以下命令：
 
-## 安装二进制文件
+```shell
+git clone https://gitlab.com/qemu-project/qemu.git
+cd qemu
+git submodule init
+git submodule update --recursive
+```
+
+
+
+## 7. 进入临时配置目录
+
+```shell
+cd ./qemu-configure
+```
+
+
+
+## 8. 配置源码工程
+
+>  这里安装目录以：C:\Users\xidon\program\QEMU-MACHINE 为例
+
+###  方式1：使用工程自带源码
+
+```shell
+../qemu-9.0.0/configure --prefix=/C/Users/xidon/program/QEMU-MACHINE
+```
+
+### 方式2：使用其它版本源码
+
+```shell
+../qemu-版本号/configure --prefix=/C/Users/xidon/program/QEMU-MACHINE
+```
+
+### 方式3：使用官方最新源码
+
+``` shell
+../qemu/configure --prefix=/C/Users/xidon/program/QEMU-MACHINE
+```
+
+
+
+## 9. 编译源码工程
+
+```shell
+make -j16
+```
+
+
+
+## 10. 安装二进制文件
+
+```shell
 make install
+```
 
-## 安装的二进制文件所在目录
+
+
+## 11. 安装的二进制文件所在目录
+
+```shell
 C:\Users\xidon\program\QEMU-MACHINE
+```
+
