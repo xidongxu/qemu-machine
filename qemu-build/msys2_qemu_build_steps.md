@@ -37,17 +37,17 @@
 
 
 
-## 3. 打开 MSYS2 终端
+## 3. 使用 MSYS2 
 
-> 尽量使用管理员权限
+> 使用管理员权限打开终端
 
-MSYS2 MINGW64
+开始菜单找到 MSYS2 文件夹，然后找到：MSYS2 MINGW64，使用管理员权限打开此终端
 
 
 
 ## 4. 在 MSYS2 安装 qemu 依赖库
 
-> 期间可能会询问是否安装，直接全部 Y 即可，还可能会自动关闭终端，需要再次使用管理员权限打开，继续执行其它安装步骤
+> 期间可能会询问是否安装，直接全部 Y 即可，安装过程中可能会自动关闭终端，需要再次使用管理员权限打开，继续执行其它安装步骤
 
 ```shell
 pacman -Syu
@@ -147,9 +147,9 @@ cd ./qemu-machine
 
 > 工程自带的qemu版本为 qemu-9.0.0，无需执行其它操作
 
-### 方式2：下载源码压缩文件
+### 方式2：下载指定压缩版本
 
-> 如果需要其它版本，请使用以下命令自行下载解压，例如9.0.0版本，使用以下命令：
+> 如果需要其它版本，请使用以下命令自行下载解压，例如 qemu-9.0.0 版本，则使用以下命令：
 
 ```shell
 wget https://download.qemu.org/qemu-9.0.0.tar.xz
@@ -165,6 +165,7 @@ git clone https://gitlab.com/qemu-project/qemu.git
 cd qemu
 git submodule init
 git submodule update --recursive
+cd ..
 ```
 
 
@@ -177,7 +178,7 @@ cd ./qemu-configure
 
 
 
-## 8. 配置源码工程
+## 8. 配置工程
 
 >  这里安装目录以：C:\Users\xidon\program\QEMU-MACHINE 为例
 
@@ -201,7 +202,7 @@ cd ./qemu-configure
 
 
 
-## 9. 编译源码工程
+## 9. 构建工程
 
 ```shell
 make -j16
