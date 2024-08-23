@@ -479,24 +479,24 @@ NOTE: The object files are built at the place where configure is launched
 ../qemu-9.0.0/configure --prefix=<安装目录> --target-list=aarch64-softmmu,arm-softmmu
 ```
 
->  这里安装目录以：C:\Users\xidon\program\QEMU-MACHINE 为例
+>  这里安装目录以：C:\Users\xidon\code\github\qemu-machine\qemu-build 为例
 
 ###  方式1：使用工程自带源码
 
 ```shell
-../qemu-9.0.0/configure --prefix=/C/Users/xidon/program/QEMU-MACHINE
+../qemu-9.0.0/configure --prefix=/C/Users/xidon/code/github/qemu-machine/qemu-build
 ```
 
 ### 方式2：使用其它版本源码
 
 ```shell
-../qemu-版本号/configure --prefix=/C/Users/xidon/program/QEMU-MACHINE
+../qemu-版本号/configure --prefix=/C/Users/xidon/code/github/qemu-machine/qemu-build
 ```
 
 ### 方式3：使用官方最新源码
 
 ``` shell
-../qemu/configure --prefix=/C/Users/xidon/program/QEMU-MACHINE
+../qemu/configure --prefix=/C/Users/xidon/code/github/qemu-machine/qemu-build
 ```
 
 
