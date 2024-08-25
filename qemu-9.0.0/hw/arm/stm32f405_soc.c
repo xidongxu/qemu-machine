@@ -51,6 +51,8 @@ static const int spi_irq[] =   { 35, 36, 51, 0, 0, 0 };
 static const int exti_irq[] =  { 6, 7, 8, 9, 10, 23, 23, 23, 23, 23, 40,
                                  40, 40, 40, 40, 40} ;
 
+#define RCC_BASE_ADDRESS        0x40023800
+#define RCC_IRQ                 5
 
 static void stm32f405_soc_initfn(Object *obj)
 {
@@ -80,6 +82,7 @@ static void stm32f405_soc_initfn(Object *obj)
     }
 
     object_initialize_child(obj, "exti", &s->exti, TYPE_STM32F4XX_EXTI);
+    object_initialize_child(obj, "rcc", &s->rcc, TYPE_STM32F4XX_RCC);
 
     s->sysclk = qdev_init_clock_in(DEVICE(s), "sysclk", NULL, NULL, 0);
     s->refclk = qdev_init_clock_in(DEVICE(s), "refclk", NULL, NULL, 0);
@@ -243,6 +246,14 @@ static void stm32f405_soc_realize(DeviceState *dev_soc, Error **errp)
         qdev_connect_gpio_out(DEVICE(&s->syscfg), i, qdev_get_gpio_in(dev, i));
     }
 
+    /* RCC device */
+    busdev = SYS_BUS_DEVICE(&s->rcc);
+    if (!sysbus_realize(busdev, errp)) {
+        return;
+    }
+    sysbus_mmio_map(busdev, 0, RCC_BASE_ADDRESS);
+    sysbus_connect_irq(busdev, 0, qdev_get_gpio_in(armv7m, RCC_IRQ));
+
     create_unimplemented_device("timer[7]",    0x40001400, 0x400);
     create_unimplemented_device("timer[12]",   0x40001800, 0x400);
     create_unimplemented_device("timer[6]",    0x40001000, 0x400);
@@ -276,7 +287,6 @@ static void stm32f405_soc_realize(DeviceState *dev_soc, Error **errp)
     create_unimplemented_device("GPIOH",       0x40021C00, 0x400);
     create_unimplemented_device("GPIOI",       0x40022000, 0x400);
     create_unimplemented_device("CRC",         0x40023000, 0x400);
-    create_unimplemented_device("RCC",         0x40023800, 0x400);
     create_unimplemented_device("Flash Int",   0x40023C00, 0x400);
     create_unimplemented_device("BKPSRAM",     0x40024000, 0x400);
     create_unimplemented_device("DMA1",        0x40026000, 0x400);
