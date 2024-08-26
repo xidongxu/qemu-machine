@@ -910,40 +910,34 @@ static void rcc_update_csr(STM32F4XXRCCState *s)
 static void stm32f4xx_rcc_reset_hold(Object *obj)
 {
     STM32F4XXRCCState *s = STM32F4XX_RCC(obj);
-    s->cr = 0x00000063;
+    s->cr = 0x00000083;
     /*
      * Factory-programmed calibration data
      * From the reference manual: 0x10XX 00XX
      * Value taken from a real card.
      */
-    s->icscr = 0x106E0082;
+    s->pllcfgr = 0x24003010;
     s->cfgr = 0x0;
-    s->pllcfgr = 0x00001000;
-    s->pllsai1cfgr = 0x00001000;
-    s->pllsai2cfgr = 0x00001000;
-    s->cier = 0x0;
-    s->cifr = 0x0;
+    s->cir = 0x0;
     s->ahb1rstr = 0x0;
     s->ahb2rstr = 0x0;
     s->ahb3rstr = 0x0;
-    s->apb1rstr1 = 0x0;
-    s->apb1rstr2 = 0x0;
+    s->apb1rstr = 0x0;
     s->apb2rstr = 0x0;
-    s->ahb1enr = 0x00000100;
+    s->ahb1enr = 0x00100000;
     s->ahb2enr = 0x0;
     s->ahb3enr = 0x0;
-    s->apb1enr1 = 0x0;
-    s->apb1enr2 = 0x0;
+    s->apb1enr = 0x0;
     s->apb2enr = 0x0;
-    s->ahb1smenr = 0x00011303;
-    s->ahb2smenr = 0x000532FF;
-    s->ahb3smenr =  0x00000101;
-    s->apb1smenr1 = 0xF2FECA3F;
-    s->apb1smenr2 = 0x00000025;
-    s->apb2smenr = 0x01677C01;
-    s->ccipr = 0x0;
+    s->ahb1lpenr = 0x7E6791FF;
+    s->ahb2lpenr = 0x000000F1;
+    s->ahb3lpenr = 0x00000001;
+    s->apb1lpenr = 0x36FEC9FF;
+    s->apb2lpenr = 0x00075F33;
     s->bdcr = 0x0;
-    s->csr = 0x0C000600;
+    s->csr = 0x0E000000;
+    s->sscgr = 0x0;
+    s->plli2scfgr = 0x20003000;
 }
 
 static uint64_t stm32f4xx_rcc_read(void *opaque, hwaddr addr,

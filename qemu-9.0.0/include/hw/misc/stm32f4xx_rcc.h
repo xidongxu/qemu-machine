@@ -185,34 +185,28 @@ struct STM32F4XXRCCState {
     MemoryRegion mmio;
 
     uint32_t cr;
-    uint32_t icscr;
-    uint32_t cfgr;
     uint32_t pllcfgr;
-    uint32_t pllsai1cfgr;
-    uint32_t pllsai2cfgr;
-    uint32_t cier;
-    uint32_t cifr;
+    uint32_t cfgr;
+    uint32_t cir;
     uint32_t ahb1rstr;
     uint32_t ahb2rstr;
     uint32_t ahb3rstr;
-    uint32_t apb1rstr1;
-    uint32_t apb1rstr2;
+    uint32_t apb1rstr;
     uint32_t apb2rstr;
     uint32_t ahb1enr;
     uint32_t ahb2enr;
     uint32_t ahb3enr;
-    uint32_t apb1enr1;
-    uint32_t apb1enr2;
+    uint32_t apb1enr;
     uint32_t apb2enr;
-    uint32_t ahb1smenr;
-    uint32_t ahb2smenr;
-    uint32_t ahb3smenr;
-    uint32_t apb1smenr1;
-    uint32_t apb1smenr2;
-    uint32_t apb2smenr;
-    uint32_t ccipr;
+    uint32_t ahb1lpenr;
+    uint32_t ahb2lpenr;
+    uint32_t ahb3lpenr;
+    uint32_t apb1lpenr;
+    uint32_t apb2lpenr;
     uint32_t bdcr;
     uint32_t csr;
+    uint32_t sscgr;
+    uint32_t plli2scfgr;
 
     /* Clock sources */
     Clock *gnd;
