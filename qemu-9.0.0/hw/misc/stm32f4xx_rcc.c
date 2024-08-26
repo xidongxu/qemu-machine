@@ -950,29 +950,14 @@ static uint64_t stm32f4xx_rcc_read(void *opaque, hwaddr addr,
     case A_CR:
         retvalue = s->cr;
         break;
-    case A_ICSCR:
-        retvalue = s->icscr;
+    case A_PLLCFGR:
+        retvalue = s->pllcfgr;
         break;
     case A_CFGR:
         retvalue = s->cfgr;
         break;
-    case A_PLLCFGR:
-        retvalue = s->pllcfgr;
-        break;
-    case A_PLLSAI1CFGR:
-        retvalue = s->pllsai1cfgr;
-        break;
-    case A_PLLSAI2CFGR:
-        retvalue = s->pllsai2cfgr;
-        break;
-    case A_CIER:
-        retvalue = s->cier;
-        break;
-    case A_CIFR:
-        retvalue = s->cifr;
-        break;
-    case A_CICR:
-        /* CICR is write only, return the reset value = 0 */
+    case A_CIR:
+        retvalue = s->cir;
         break;
     case A_AHB1RSTR:
         retvalue = s->ahb1rstr;
@@ -983,11 +968,8 @@ static uint64_t stm32f4xx_rcc_read(void *opaque, hwaddr addr,
     case A_AHB3RSTR:
         retvalue = s->ahb3rstr;
         break;
-    case A_APB1RSTR1:
-        retvalue = s->apb1rstr1;
-        break;
-    case A_APB1RSTR2:
-        retvalue = s->apb1rstr2;
+    case A_APB1RSTR:
+        retvalue = s->apb1rstr;
         break;
     case A_APB2RSTR:
         retvalue = s->apb2rstr;
@@ -1001,41 +983,38 @@ static uint64_t stm32f4xx_rcc_read(void *opaque, hwaddr addr,
     case A_AHB3ENR:
         retvalue = s->ahb3enr;
         break;
-    case A_APB1ENR1:
-        retvalue = s->apb1enr1;
-        break;
-    case A_APB1ENR2:
-        retvalue = s->apb1enr2;
+    case A_APB1ENR:
+        retvalue = s->apb1enr;
         break;
     case A_APB2ENR:
         retvalue = s->apb2enr;
         break;
-    case A_AHB1SMENR:
-        retvalue = s->ahb1smenr;
+    case AHB1LPENR:
+        retvalue = s->ahb1lpenr;
         break;
-    case A_AHB2SMENR:
-        retvalue = s->ahb2smenr;
+    case AHB2LPENR:
+        retvalue = s->ahb2lpenr;
         break;
-    case A_AHB3SMENR:
-        retvalue = s->ahb3smenr;
+    case A_AHB3LPENR:
+        retvalue = s->ahb3lpenr;
         break;
-    case A_APB1SMENR1:
-        retvalue = s->apb1smenr1;
+    case A_APB1LPENR:
+        retvalue = s->apb1lpenr;
         break;
-    case A_APB1SMENR2:
-        retvalue = s->apb1smenr2;
-        break;
-    case A_APB2SMENR:
-        retvalue = s->apb2smenr;
-        break;
-    case A_CCIPR:
-        retvalue = s->ccipr;
+    case A_APB2LPENR:
+        retvalue = s->apb2lpenr;
         break;
     case A_BDCR:
         retvalue = s->bdcr;
         break;
     case A_CSR:
         retvalue = s->csr;
+        break;
+    case A_SSCGR:
+        retvalue = s->sscgr;
+        break;
+    case A_PLLI2SCFGR:
+        retvalue = s->plli2scfgr;
         break;
     default:
         qemu_log_mask(LOG_GUEST_ERROR,

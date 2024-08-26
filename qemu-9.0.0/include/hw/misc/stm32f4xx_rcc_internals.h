@@ -303,37 +303,165 @@ REG32(PLLI2SCFGR, 0x84)
     FIELD(PLLI2SCFGR, PLLI2SN, 6, 9)
 
 /* Read Only masks to prevent writes in unauthorized bits */
-#define CR_READ_ONLY_MASK (R_CR_PLLSAI2RDY_MASK | \
-                           R_CR_PLLSAI1RDY_MASK | \
-                           R_CR_PLLRDY_MASK     | \
-                           R_CR_HSERDY_MASK     | \
-                           R_CR_HSIRDY_MASK     | \
-                           R_CR_MSIRDY_MASK)
-#define CR_READ_SET_MASK (R_CR_CSSON_MASK | R_CR_MSIRGSEL_MASK)
-#define ICSCR_READ_ONLY_MASK (R_ICSCR_HSICAL_MASK | R_ICSCR_MSICAL_MASK)
-#define CFGR_READ_ONLY_MASK (R_CFGR_SWS_MASK)
-#define CIFR_READ_ONLY_MASK (R_CIFR_LSECSSF_MASK     | \
-                             R_CIFR_CSSF_MASK        | \
-                             R_CIFR_PLLSAI2RDYF_MASK | \
-                             R_CIFR_PLLSAI1RDYF_MASK | \
-                             R_CIFR_PLLRDYF_MASK     | \
-                             R_CIFR_HSERDYF_MASK     | \
-                             R_CIFR_HSIRDYF_MASK     | \
-                             R_CIFR_MSIRDYF_MASK     | \
-                             R_CIFR_LSERDYF_MASK     | \
-                             R_CIFR_LSIRDYF_MASK)
-#define CIFR_IRQ_MASK CIFR_READ_ONLY_MASK
-#define APB2ENR_READ_SET_MASK (R_APB2ENR_FWEN_MASK)
-#define BDCR_READ_ONLY_MASK (R_BDCR_LSECSSD_MASK | R_BDCR_LSERDY_MASK)
-#define CSR_READ_ONLY_MASK (R_CSR_LPWRRSTF_MASK | \
-                            R_CSR_WWDGRSTF_MASK | \
-                            R_CSR_IWWGRSTF_MASK | \
-                            R_CSR_SFTRSTF_MASK  | \
-                            R_CSR_BORRSTF_MASK  | \
-                            R_CSR_PINRSTF_MASK  | \
-                            R_CSR_OBLRSTF_MASK  | \
-                            R_CSR_FWRSTF_MASK   | \
-                            R_CSR_LSIRDY_MASK)
+#define CR_RO_MASK         (R_CR_PLLI2SRDY_MASK | \
+                            R_CR_PLLRDY_MASK | \
+                            R_CR_HSERDY_MASK | \
+                            R_CR_HSICAL_MASK | \
+                            R_CR_HSIRDY_MASK)
+#define CR_WO_MASK         (0)
+#define CR_WR_MASK         (R_CR_PLLI2SON_MASK | \
+                            R_CR_PLLON_MASK | \
+                            R_CR_CSSON_MASK | \
+                            R_CR_HSEBYP_MASK | \
+                            R_CR_HSEON_MASK | \
+                            R_CR_HSITRIM_MASK | \
+                            R_CR_HSION_MASK)
+
+#define PLLCFGR_RO_MASK    (0)
+#define PLLCFGR_WO_MASK    (0)
+#define PLLCFGR_WR_MASK    (R_PLLCFGR_PLLQ_MASK | \
+                            R_PLLCFGR_PLLSRC_MASK | \
+                            R_PLLCFGR_PLLP_MASK | \
+                            R_PLLCFGR_PLLN_MASK | \
+                            R_PLLCFGR_PLLM_MASK)
+
+#define CFGR_RO_MASK       (R_CFGR_SWS_MASK)
+#define CFGR_WO_MASK       (0)
+#define CFGR_WR_MASK       (R_CFGR_MCO2_MASK | \
+                            R_CFGR_MCO2PRE_MASK | \
+                            R_CFGR_MCO1PRE_MASK | \
+                            R_CFGR_I2SSRC_MASK | \
+                            R_CFGR_MCO1_MASK | \
+                            R_CFGR_RTCPRE_MASK | \
+                            R_CFGR_PPRE2_MASK | \
+                            R_CFGR_PPRE1_MASK | \
+                            R_CFGR_HPRE_MASK | \
+                            R_CFGR_SW_MASK)
+
+#define CIR_RO_MASK        (R_CIR_CSSF_MASK | \
+                            R_CIR_PLLI2SRDYF_MASK | \
+                            R_CIR_PLLRDYF_MASK | \
+                            R_CIR_HSERDYF_MASK | \
+                            R_CIR_HSIRDYF_MASK | \
+                            R_CIR_LSERDYF_MASK | \
+                            R_CIR_LSIRDYF_MASK)
+#define CIR_WO_MASK        (R_CIR_CSSC_MASK | \
+                            R_CIR_PLLI2SRDYC_MASK | \
+                            R_CIR_PLLRDYC_MASK | \
+                            R_CIR_HSERDYC_MASK | \
+                            R_CIR_HSIRDYC_MASK | \
+                            R_CIR_LSERDYC_MASK | \
+                            R_CIR_LSIRDYC_MASK)
+#define CIR_WR_MASK        (R_CIR_PLLI2SRDYIE_MASK | \
+                            R_CIR_PLLRDYIE_MASK | \
+                            R_CIR_HSERDYIE_MASK | \
+                            R_CIR_HSIRDYIE_MASK | \
+                            R_CIR_LSERDYIE_MASK | \
+                            R_CIR_LSIRDYIE_MASK)
+
+#define AHB1RSTR_RO_MASK   (0)
+#define AHB1RSTR_WO_MASK   (0)
+#define AHB1RSTR_WR_MASK   (R_AHB1RSTR_OTGHSRST_MASK | \
+                            R_AHB1RSTR_ETHMACRST_MASK | \
+                            R_AHB1RSTR_DMA2RST_MASK | \
+                            R_AHB1RSTR_DMA1RST_MASK | \
+                            R_AHB1RSTR_CRCRST_MASK | \
+                            R_AHB1RSTR_GPIOIRST_MASK | \
+                            R_AHB1RSTR_GPIOHRST_MASK | \
+                            R_AHB1RSTR_GPIOGRST_MASK | \
+                            R_AHB1RSTR_GPIOFRST_MASK | \
+                            R_AHB1RSTR_GPIOERST_MASK | \
+                            R_AHB1RSTR_GPIODRST_MASK | \
+                            R_AHB1RSTR_GPIOCRST_MASK | \
+                            R_AHB1RSTR_GPIOBRST_MASK | \
+                            R_AHB1RSTR_GPIOARST_MASK)
+
+#define AHB2RSTR_RO_MASK   (0)
+#define AHB2RSTR_WO_MASK   (0)
+#define AHB2RSTR_WR_MASK   (R_AHB2RSTR_OTGFSRST_MASK | \
+                            R_AHB2RSTR_RNGRST_MASK | \
+                            R_AHB2RSTR_HASHRST_MASK | \
+                            R_AHB2RSTR_CRYPRST_MASK | \
+                            R_AHB2RSTR_DCMIRST_MASK)
+
+#define AHB3RSTR_RO_MASK   (0)
+#define AHB3RSTR_WO_MASK   (0)
+#define AHB3RSTR_WR_MASK   (R_AHB3RSTR_FSMCRST_MASK)
+
+#define APB1RSTR_RO_MASK   (0)
+#define APB1RSTR_WO_MASK   (0)
+#define APB1RSTR_WR_MASK   (R_APB1RSTR_DACRST_MASK | \
+                            R_APB1RSTR_PWRRST_MASK | \
+                            R_APB1RSTR_CAN2RST_MASK | \
+                            R_APB1RSTR_CAN1RST_MASK | \
+                            R_APB1RSTR_I2C3RST_MASK | \
+                            R_APB1RSTR_I2C2RST_MASK | \
+                            R_APB1RSTR_I2C1RST_MASK | \
+                            R_APB1RSTR_UART5RST_MASK | \
+                            R_APB1RSTR_UART4RST_MASK | \
+                            R_APB1RSTR_USART3RST_MASK | \
+                            R_APB1RSTR_USART2RST_MASK | \
+                            R_APB1RSTR_SPI3RST_MASK | \
+                            R_APB1RSTR_SPI2RST_MASK | \
+                            R_APB1RSTR_WWDGRST_MASK | \
+                            R_APB1RSTR_TIM14RST_MASK | \
+                            R_APB1RSTR_TIM13RST_MASK | \
+                            R_APB1RSTR_TIM12RST_MASK | \
+                            R_APB1RSTR_TIM7RST_MASK | \
+                            R_APB1RSTR_TIM6RST_MASK | \
+                            R_APB1RSTR_TIM5RST_MASK | \
+                            R_APB1RSTR_TIM4RST_MASK | \
+                            R_APB1RSTR_TIM3RST_MASK | \
+                            R_APB1RSTR_TIM2RST_MASK)
+
+#define APB2RSTR_RO_MASK   (0)
+#define APB2RSTR_WO_MASK   (0)
+#define APB2RSTR_WR_MASK   (R_APB2RSTR_TIM11RST_MASK | \
+                            R_APB2RSTR_TIM10RST_MASK | \
+                            R_APB2RSTR_TIM9RST_MASK | \
+                            R_APB2RSTR_SYSCFGRST_MASK | \
+                            R_APB2RSTR_SPI1RST_MASK | \
+                            R_APB2RSTR_SDIORST_MASK | \
+                            R_APB2RSTR_ADCRST_MASK | \
+                            R_APB2RSTR_USART6RST_MASK | \
+                            R_APB2RSTR_USART1RST_MASK | \
+                            R_APB2RSTR_TIM8RST_MASK | \
+                            R_APB2RSTR_TIM1RST_MASK)
+
+#define AHB1ENR_RO_MASK    (0)
+#define AHB1ENR_WO_MASK    (0)
+#define AHB1ENR_WR_MASK    (R_AHB1ENR_OTGHSULPIEN_MASK | \
+                            R_AHB1ENR_OTGHSEN_MASK | \
+                            R_AHB1ENR_ETHMACPTPEN_MASK | \
+                            R_AHB1ENR_ETHMACRXEN_MASK | \
+                            R_AHB1ENR_ETHMACTXEN_MASK | \
+                            R_AHB1ENR_ETHMACEN_MASK | \
+                            R_AHB1ENR_DMA2EN_MASK | \
+                            R_AHB1ENR_DMA1EN_MASK | \
+                            R_AHB1ENR_CCMDATARAMEN_MASK | \
+                            R_AHB1ENR_BKPSRAMEN_MASK | \
+                            R_AHB1ENR_CRCEN_MASK | \
+                            R_AHB1ENR_GPIOIEN_MASK | \
+                            R_AHB1ENR_GPIOHEN_MASK | \
+                            R_AHB1ENR_GPIOGEN_MASK | \
+                            R_AHB1ENR_GPIOFEN_MASK | \
+                            R_AHB1ENR_GPIOEEN_MASK | \
+                            R_AHB1ENR_GPIODEN_MASK | \
+                            R_AHB1ENR_GPIOCEN_MASK | \
+                            R_AHB1ENR_GPIOBEN_MASK | \
+                            R_AHB1ENR_GPIOAEN_MASK)
+
+#define AHB2ENR_RO_MASK    (0)
+#define AHB2ENR_WO_MASK    (0)
+#define AHB2ENR_WR_MASK    (R_AHB2ENR_OTGFSEN_MASK | \
+                            R_AHB2ENR_RNGEN_MASK | \
+                            R_AHB2ENR_HASHEN_MASK | \
+                            R_AHB2ENR_CRYPEN_MASK | \
+                            R_AHB2ENR_DCMIEN_MASK)
+
+#define AHB3ENR_RO_MASK    (0)
+#define AHB3ENR_WO_MASK    (0)
+#define AHB3ENR_WR_MASK    (R_AHB3ENR_FSMCEN_MASK)
 
 /* Pll Channels */
 enum PllChannels {
