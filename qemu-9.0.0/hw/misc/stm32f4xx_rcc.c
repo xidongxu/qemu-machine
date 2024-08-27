@@ -1018,7 +1018,7 @@ static uint64_t stm32f4xx_rcc_read(void *opaque, hwaddr addr,
         break;
     default:
         qemu_log_mask(LOG_GUEST_ERROR,
-                      "%s: Bad offset 0x%"HWADDR_PRIx"\n", __func__, addr);
+                "%s: Bad offset 0x%"HWADDR_PRIx"\n", __func__, addr);
         break;
     }
 
@@ -1039,50 +1039,26 @@ static void stm32f4xx_rcc_write(void *opaque, hwaddr addr,
     switch (addr) {
     case A_CR:
         previous_value = s->cr;
-        s->cr = (s->cr & CR_READ_SET_MASK) |
-                (value & (CR_READ_SET_MASK | ~CR_READ_ONLY_MASK));
+        s->cr = (s->cr & CR_RW_MASK) |
+                (value & (CR_RW_MASK | ~CR_RO_MASK));
         rcc_update_cr_register(s, previous_value);
-        break;
-    case A_ICSCR:
-        s->icscr = value & ~ICSCR_READ_ONLY_MASK;
-        qemu_log_mask(LOG_UNIMP,
-                "%s: Side-effects not implemented for ICSCR\n", __func__);
-        break;
-    case A_CFGR:
-        s->cfgr = value & ~CFGR_READ_ONLY_MASK;
-        rcc_update_cfgr_register(s);
         break;
     case A_PLLCFGR:
         s->pllcfgr = value;
         rcc_update_pllcfgr(s);
         break;
-    case A_PLLSAI1CFGR:
-        s->pllsai1cfgr = value;
-        rcc_update_pllsaixcfgr(s, RCC_PLL_PLLSAI1);
+    case A_CFGR:
+        s->cfgr = value & ~CFGR_RO_MASK;
+        rcc_update_cfgr_register(s);
         break;
-    case A_PLLSAI2CFGR:
-        s->pllsai2cfgr = value;
-        rcc_update_pllsaixcfgr(s, RCC_PLL_PLLSAI2);
+    case A_CIR:
+        s->cir = value & ~CIR_RO_MASK;
+        qemu_log_mask(LOG_UNIMP, 
+                "%s: Side-effects not implemented for CIR\n", __func__);
         break;
-    case A_CIER:
-        s->cier = value;
-        qemu_log_mask(LOG_UNIMP,
-                "%s: Side-effects not implemented for CIER\n", __func__);
-        break;
-    case A_CIFR:
-        qemu_log_mask(LOG_GUEST_ERROR,
-            "%s: Write attempt into read-only register (CIFR) 0x%"PRIx32"\n",
-            __func__, value);
-        break;
-    case A_CICR:
-        /* Clear interrupt flags by writing a 1 to the CICR register */
-        s->cifr &= ~value;
-        rcc_update_irq(s);
-        break;
-    /* Reset behaviors are not implemented */
     case A_AHB1RSTR:
         s->ahb1rstr = value;
-        qemu_log_mask(LOG_UNIMP,
+        qemu_log_mask(LOG_UNIMP, 
                 "%s: Side-effects not implemented for AHB1RSTR\n", __func__);
         break;
     case A_AHB2RSTR:
@@ -1095,15 +1071,10 @@ static void stm32f4xx_rcc_write(void *opaque, hwaddr addr,
         qemu_log_mask(LOG_UNIMP,
                 "%s: Side-effects not implemented for AHB3RSTR\n", __func__);
         break;
-    case A_APB1RSTR1:
-        s->apb1rstr1 = value;
+    case A_APB1RSTR:
+        s->apb1rstr = value;
         qemu_log_mask(LOG_UNIMP,
-                "%s: Side-effects not implemented for APB1RSTR1\n", __func__);
-        break;
-    case A_APB1RSTR2:
-        s->apb1rstr2 = value;
-        qemu_log_mask(LOG_UNIMP,
-                "%s: Side-effects not implemented for APB1RSTR2\n", __func__);
+                "%s: Side-effects not implemented for APB1RSTR\n", __func__);
         break;
     case A_APB2RSTR:
         s->apb2rstr = value;
@@ -1122,64 +1093,60 @@ static void stm32f4xx_rcc_write(void *opaque, hwaddr addr,
         s->ahb3enr = value;
         rcc_update_ahb3enr(s);
         break;
-    case A_APB1ENR1:
-        s->apb1enr1 = value;
-        rcc_update_apb1enr(s);
-        break;
-    case A_APB1ENR2:
-        s->apb1enr2 = value;
+    case A_APB1ENR:
+        s->apb1enr = value;
         rcc_update_apb1enr(s);
         break;
     case A_APB2ENR:
-        s->apb2enr = (s->apb2enr & APB2ENR_READ_SET_MASK) | value;
+        s->apb2enr = value;
         rcc_update_apb2enr(s);
         break;
-    /* Behaviors for Sleep and Stop modes are not implemented */
-    case A_AHB1SMENR:
-        s->ahb1smenr = value;
+    case A_AHB1LPENR:
+        s->ahb1lpenr = value;
         qemu_log_mask(LOG_UNIMP,
-                "%s: Side-effects not implemented for AHB1SMENR\n", __func__);
+                "%s: Side-effects not implemented for A_AHB1LPENR\n", __func__);
         break;
-    case A_AHB2SMENR:
-        s->ahb2smenr = value;
+    case A_AHB2LPENR:
+        s->ahb2lpenr = value;
         qemu_log_mask(LOG_UNIMP,
-                "%s: Side-effects not implemented for AHB2SMENR\n", __func__);
+                "%s: Side-effects not implemented for AHB2LPENR\n", __func__);
         break;
-    case A_AHB3SMENR:
-        s->ahb3smenr = value;
+    case A_AHB3LPENR:
+        s->ahb3lpenr = value;
         qemu_log_mask(LOG_UNIMP,
-                "%s: Side-effects not implemented for AHB3SMENR\n", __func__);
+                "%s: Side-effects not implemented for AHB3LPENR\n", __func__);
         break;
-    case A_APB1SMENR1:
-        s->apb1smenr1 = value;
+    case A_APB1LPENR:
+        s->apb1lpenr = value;
         qemu_log_mask(LOG_UNIMP,
-                "%s: Side-effects not implemented for APB1SMENR1\n", __func__);
+                "%s: Side-effects not implemented for A_APB1LPENR\n", __func__);
         break;
-    case A_APB1SMENR2:
-        s->apb1smenr2 = value;
+    case A_APB2LPENR:
+        s->apb2lpenr = value;
         qemu_log_mask(LOG_UNIMP,
-                "%s: Side-effects not implemented for APB1SMENR2\n", __func__);
-        break;
-    case A_APB2SMENR:
-        s->apb2smenr = value;
-        qemu_log_mask(LOG_UNIMP,
-                "%s: Side-effects not implemented for APB2SMENR\n", __func__);
-        break;
-    case A_CCIPR:
-        s->ccipr = value;
-        rcc_update_ccipr(s);
+                "%s: Side-effects not implemented for A_APB2LPENR\n", __func__);
         break;
     case A_BDCR:
-        s->bdcr = value & ~BDCR_READ_ONLY_MASK;
+        s->bdcr = value & ~BDCR_RO_MASK;
         rcc_update_bdcr(s);
         break;
     case A_CSR:
-        s->csr = value & ~CSR_READ_ONLY_MASK;
+        s->csr = value & ~CSR_RO_MASK;
         rcc_update_csr(s);
+        break;
+    case A_SSCGR:
+        s->sscgr = value;
+        qemu_log_mask(LOG_UNIMP,
+                "%s: Side-effects not implemented for SSCGR\n", __func__);
+        break;
+    case A_PLLI2SCFGR:
+        s->plli2scfgr = value;
+        qemu_log_mask(LOG_UNIMP,
+                "%s: Side-effects not implemented for PLLI2SCFGR\n", __func__);
         break;
     default:
         qemu_log_mask(LOG_GUEST_ERROR,
-                      "%s: Bad offset 0x%"HWADDR_PRIx"\n", __func__, addr);
+                "%s: Bad offset 0x%"HWADDR_PRIx"\n", __func__, addr);
     }
 }
 
@@ -1304,34 +1271,28 @@ static const VMStateDescription vmstate_stm32f4xx_rcc = {
     .minimum_version_id = 1,
     .fields = (VMStateField[]) {
         VMSTATE_UINT32(cr, STM32F4XXRCCState),
-        VMSTATE_UINT32(icscr, STM32F4XXRCCState),
-        VMSTATE_UINT32(cfgr, STM32F4XXRCCState),
         VMSTATE_UINT32(pllcfgr, STM32F4XXRCCState),
-        VMSTATE_UINT32(pllsai1cfgr, STM32F4XXRCCState),
-        VMSTATE_UINT32(pllsai2cfgr, STM32F4XXRCCState),
-        VMSTATE_UINT32(cier, STM32F4XXRCCState),
-        VMSTATE_UINT32(cifr, STM32F4XXRCCState),
+        VMSTATE_UINT32(cfgr, STM32F4XXRCCState),
+        VMSTATE_UINT32(cir, STM32F4XXRCCState),
         VMSTATE_UINT32(ahb1rstr, STM32F4XXRCCState),
         VMSTATE_UINT32(ahb2rstr, STM32F4XXRCCState),
         VMSTATE_UINT32(ahb3rstr, STM32F4XXRCCState),
-        VMSTATE_UINT32(apb1rstr1, STM32F4XXRCCState),
-        VMSTATE_UINT32(apb1rstr2, STM32F4XXRCCState),
+        VMSTATE_UINT32(apb1rstr, STM32F4XXRCCState),
         VMSTATE_UINT32(apb2rstr, STM32F4XXRCCState),
         VMSTATE_UINT32(ahb1enr, STM32F4XXRCCState),
         VMSTATE_UINT32(ahb2enr, STM32F4XXRCCState),
         VMSTATE_UINT32(ahb3enr, STM32F4XXRCCState),
-        VMSTATE_UINT32(apb1enr1, STM32F4XXRCCState),
-        VMSTATE_UINT32(apb1enr2, STM32F4XXRCCState),
+        VMSTATE_UINT32(apb1enr, STM32F4XXRCCState),
         VMSTATE_UINT32(apb2enr, STM32F4XXRCCState),
-        VMSTATE_UINT32(ahb1smenr, STM32F4XXRCCState),
-        VMSTATE_UINT32(ahb2smenr, STM32F4XXRCCState),
-        VMSTATE_UINT32(ahb3smenr, STM32F4XXRCCState),
-        VMSTATE_UINT32(apb1smenr1, STM32F4XXRCCState),
-        VMSTATE_UINT32(apb1smenr2, STM32F4XXRCCState),
-        VMSTATE_UINT32(apb2smenr, STM32F4XXRCCState),
-        VMSTATE_UINT32(ccipr, STM32F4XXRCCState),
+        VMSTATE_UINT32(ahb1lpenr, STM32F4XXRCCState),
+        VMSTATE_UINT32(ahb2lpenr, STM32F4XXRCCState),
+        VMSTATE_UINT32(ahb3lpenr, STM32F4XXRCCState),
+        VMSTATE_UINT32(apb1lpenr, STM32F4XXRCCState),
+        VMSTATE_UINT32(apb2lpenr2, STM32F4XXRCCState),
         VMSTATE_UINT32(bdcr, STM32F4XXRCCState),
         VMSTATE_UINT32(csr, STM32F4XXRCCState),
+        VMSTATE_CLOCK(sscgr, STM32F4XXRCCState),
+        VMSTATE_CLOCK(plli2scfgr, STM32F4XXRCCState),
         VMSTATE_CLOCK(hsi16_rc, STM32F4XXRCCState),
         VMSTATE_CLOCK(msi_rc, STM32F4XXRCCState),
         VMSTATE_CLOCK(hse, STM32F4XXRCCState),
