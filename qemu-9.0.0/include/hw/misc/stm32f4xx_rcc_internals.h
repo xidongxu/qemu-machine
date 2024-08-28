@@ -766,7 +766,6 @@ static const ClockMuxInitInfo CLOCK_MUX_INIT_INFO[] = {
         .name = "sysclk",
         /* Same mapping as: CFGR_SW */
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_MSI,
             RCC_CLOCK_MUX_SRC_HSI,
             RCC_CLOCK_MUX_SRC_HSE,
             RCC_CLOCK_MUX_SRC_PLL,
@@ -778,7 +777,6 @@ static const ClockMuxInitInfo CLOCK_MUX_INIT_INFO[] = {
         .name = "pll-input",
         /* Same mapping as: PLLCFGR_PLLSRC */
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_MSI,
             RCC_CLOCK_MUX_SRC_HSI,
             RCC_CLOCK_MUX_SRC_HSE,
         },
@@ -812,7 +810,7 @@ static const ClockMuxInitInfo CLOCK_MUX_INIT_INFO[] = {
     [RCC_CLOCK_MUX_HSE_OVER_32] = {
         .name = "hse-divided-by-32",
         .multiplier = 1,
-        .divider = 32,
+        .divider = 2,
         .enabled = true,
         .src_mapping = {
             RCC_CLOCK_MUX_SRC_HSE,

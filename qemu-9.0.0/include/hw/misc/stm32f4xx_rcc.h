@@ -24,8 +24,8 @@
 #define TYPE_STM32F4XX_RCC "stm32f4xx-rcc"
 OBJECT_DECLARE_SIMPLE_TYPE(STM32F4XXRCCState, STM32F4XX_RCC)
 
-/* In the stm32f4xx clock tree, mux have at most 7 sources */
-#define RCC_NUM_CLOCK_MUX_SRC 7
+/* In the stm32f4xx clock tree, mux have at most 5 sources */
+#define RCC_NUM_CLOCK_MUX_SRC 5
 
 typedef enum PllCommonChannels {
     RCC_PLL_COMMON_CHANNEL_P = 0,
@@ -74,38 +74,55 @@ typedef enum RccClockMux {
      * to use the same logic for all outputs.
      */
     /* - AHB1 */
-    RCC_CLOCK_MUX_TSC,
-    RCC_CLOCK_MUX_CRC,
-    RCC_CLOCK_MUX_FLASH,
+    RCC_CLOCK_MUX_OTGHSULPI,
+    RCC_CLOCK_MUX_OTGHS,
+    RCC_CLOCK_MUX_ETHMACPTP,
+    RCC_CLOCK_MUX_ETHMACRX,
+    RCC_CLOCK_MUX_ETHMACTX,
+    RCC_CLOCK_MUX_ETHMAC,
     RCC_CLOCK_MUX_DMA2,
     RCC_CLOCK_MUX_DMA1,
+    RCC_CLOCK_MUX_CCMDATARAM,
+    RCC_CLOCK_MUX_BKPSRAM,
+    RCC_CLOCK_MUX_CRC,
+    RCC_CLOCK_MUX_GPIOI,
+    RCC_CLOCK_MUX_GPIOH,
+    RCC_CLOCK_MUX_GPIOG,
+    RCC_CLOCK_MUX_GPIOF,
+    RCC_CLOCK_MUX_GPIOE,
+    RCC_CLOCK_MUX_GPIOD,
+    RCC_CLOCK_MUX_GPIOC,
+    RCC_CLOCK_MUX_GPIOB,
+    RCC_CLOCK_MUX_GPIOA,
 
     /* - AHB2 */
-    RCC_CLOCK_MUX_RNG,
-    RCC_CLOCK_MUX_AES,
     RCC_CLOCK_MUX_OTGFS,
-    RCC_CLOCK_MUX_GPIOA,
-    RCC_CLOCK_MUX_GPIOB,
-    RCC_CLOCK_MUX_GPIOC,
-    RCC_CLOCK_MUX_GPIOD,
-    RCC_CLOCK_MUX_GPIOE,
-    RCC_CLOCK_MUX_GPIOF,
-    RCC_CLOCK_MUX_GPIOG,
-    RCC_CLOCK_MUX_GPIOH,
+    RCC_CLOCK_MUX_RNG,
+    RCC_CLOCK_MUX_HASH,
+    RCC_CLOCK_MUX_CRYP,
+    RCC_CLOCK_MUX_DCMI,
 
     /* - AHB3 */
-    RCC_CLOCK_MUX_QSPI,
-    RCC_CLOCK_MUX_FMC,
+    RCC_CLOCK_MUX_FSMC,
 
     /* - APB1 */
-    RCC_CLOCK_MUX_OPAMP,
-    RCC_CLOCK_MUX_DAC1,
+    RCC_CLOCK_MUX_DAC,
     RCC_CLOCK_MUX_PWR,
+    RCC_CLOCK_MUX_CAN2,
     RCC_CLOCK_MUX_CAN1,
+    RCC_CLOCK_MUX_I2C3,
+    RCC_CLOCK_MUX_I2C2,
+    RCC_CLOCK_MUX_I2C1,
+    RCC_CLOCK_MUX_UART5,
+    RCC_CLOCK_MUX_UART4,
+    RCC_CLOCK_MUX_USART3,
+    RCC_CLOCK_MUX_USART2,
     RCC_CLOCK_MUX_SPI3,
     RCC_CLOCK_MUX_SPI2,
     RCC_CLOCK_MUX_WWDG,
-    RCC_CLOCK_MUX_LCD,
+    RCC_CLOCK_MUX_TIM14,
+    RCC_CLOCK_MUX_TIM13,
+    RCC_CLOCK_MUX_TIM12,
     RCC_CLOCK_MUX_TIM7,
     RCC_CLOCK_MUX_TIM6,
     RCC_CLOCK_MUX_TIM5,
@@ -114,29 +131,32 @@ typedef enum RccClockMux {
     RCC_CLOCK_MUX_TIM2,
 
     /* - APB2 */
-    RCC_CLOCK_MUX_TIM17,
-    RCC_CLOCK_MUX_TIM16,
-    RCC_CLOCK_MUX_TIM15,
-    RCC_CLOCK_MUX_TIM8,
-    RCC_CLOCK_MUX_SPI1,
-    RCC_CLOCK_MUX_TIM1,
-    RCC_CLOCK_MUX_SDMMC1,
-    RCC_CLOCK_MUX_FW,
+    RCC_CLOCK_MUX_TIM11,
+    RCC_CLOCK_MUX_TIM10,
+    RCC_CLOCK_MUX_TIM9,
     RCC_CLOCK_MUX_SYSCFG,
+    RCC_CLOCK_MUX_SPI1,
+    RCC_CLOCK_MUX_SDIO,
+    RCC_CLOCK_MUX_ADC3,
+    RCC_CLOCK_MUX_ADC2,
+    RCC_CLOCK_MUX_ADC1,
+    RCC_CLOCK_MUX_USART6,
+    RCC_CLOCK_MUX_USART1,
+    RCC_CLOCK_MUX_TIM8,
+    RCC_CLOCK_MUX_TIM1,
 
     /* - BDCR */
     RCC_CLOCK_MUX_RTC,
 
     /* - OTHER */
-    RCC_CLOCK_MUX_CORTEX_FCLK,
+    RCC_CLOCK_MUX_SSCG,
 
     RCC_NUM_CLOCK_MUX
 } RccClockMux;
 
 typedef enum RccPll {
     RCC_PLL_PLL,
-    RCC_PLL_PLLSAI1,
-    RCC_PLL_PLLSAI2,
+    RCC_PLL_PLLI2S,
 
     RCC_NUM_PLL
 } RccPll;
@@ -210,13 +230,11 @@ struct STM32F4XXRCCState {
 
     /* Clock sources */
     Clock *gnd;
-    Clock *hsi16_rc;
-    Clock *msi_rc;
-    Clock *hse;
+    Clock *lse;
     Clock *lsi_rc;
-    Clock *lse_crystal;
-    Clock *sai1_extclk;
-    Clock *sai2_extclk;
+    Clock *hsi_rc;
+    Clock *hse;
+    Clock *i2s_extclk;
 
     /* PLLs */
     RccPllState plls[RCC_NUM_PLL];
@@ -226,8 +244,7 @@ struct STM32F4XXRCCState {
 
     qemu_irq irq;
     uint64_t hse_frequency;
-    uint64_t sai1_extclk_frequency;
-    uint64_t sai2_extclk_frequency;
+    uint64_t i2s_extclk_frequency;
 };
 
 #endif /* HW_STM32F4XX_RCC_H */
