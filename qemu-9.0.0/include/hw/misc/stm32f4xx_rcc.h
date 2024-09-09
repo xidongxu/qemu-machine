@@ -43,31 +43,14 @@ typedef enum RccClockMux {
     RCC_CLOCK_MUX_HCLK,
     RCC_CLOCK_MUX_PCLK1,
     RCC_CLOCK_MUX_PCLK2,
-    RCC_CLOCK_MUX_HSE_OVER_32,
-    RCC_CLOCK_MUX_LCD_AND_RTC_COMMON,
+    RCC_CLOCK_MUX_HSE_RTC,
+    RCC_CLOCK_MUX_RTC,
 
-    /* Muxes with a publicly available output */
-    RCC_CLOCK_MUX_CORTEX_REFCLK,
-    RCC_CLOCK_MUX_USART1,
-    RCC_CLOCK_MUX_USART2,
-    RCC_CLOCK_MUX_USART3,
-    RCC_CLOCK_MUX_UART4,
-    RCC_CLOCK_MUX_UART5,
-    RCC_CLOCK_MUX_LPUART1,
-    RCC_CLOCK_MUX_I2C1,
-    RCC_CLOCK_MUX_I2C2,
-    RCC_CLOCK_MUX_I2C3,
-    RCC_CLOCK_MUX_LPTIM1,
-    RCC_CLOCK_MUX_LPTIM2,
-    RCC_CLOCK_MUX_SWPMI1,
-    RCC_CLOCK_MUX_MCO,
-    RCC_CLOCK_MUX_LSCO,
-    RCC_CLOCK_MUX_DFSDM1,
-    RCC_CLOCK_MUX_ADC,
-    RCC_CLOCK_MUX_CLK48,
-    RCC_CLOCK_MUX_SAI1,
-    RCC_CLOCK_MUX_SAI2,
-
+    RCC_CLOCK_MUX_CORTEX_SYSTEM_TIMER,
+    RCC_CLOCK_MUX_MCO1,
+    RCC_CLOCK_MUX_MCO2,
+    RCC_CLOCK_MUX_I2S,
+    
     /*
      * Mux that have only one input and one output assigned to as peripheral.
      * They could be direct lines but it is simpler
