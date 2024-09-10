@@ -857,7 +857,7 @@ static void rcc_update_bdcr(STM32F4XXRCCState *s)
     clock_mux_set_enable(&s->clock_muxes[RCC_CLOCK_MUX_RTC], val);
     /* LCD and RTC share the same clock */
     val = FIELD_EX32(s->bdcr, BDCR, RTCSEL);
-    clock_mux_set_source(&s->clock_muxes[RCC_CLOCK_MUX_LCD_AND_RTC_COMMON], val);
+    clock_mux_set_source(&s->clock_muxes[RCC_CLOCK_MUX_RTC_COMMON], val);
 
     /* LSECSSON */
     /* LSEDRV[1:0] */
@@ -1167,13 +1167,11 @@ static const MemoryRegionOps stm32f4xx_rcc_ops = {
 };
 
 static const ClockPortInitArray stm32f4xx_rcc_clocks = {
-    QDEV_CLOCK_IN(STM32F4XXRCCState, hsi16_rc, NULL, 0),
-    QDEV_CLOCK_IN(STM32F4XXRCCState, msi_rc, NULL, 0),
-    QDEV_CLOCK_IN(STM32F4XXRCCState, hse, NULL, 0),
+    QDEV_CLOCK_IN(STM32F4XXRCCState, lse, NULL, 0),
     QDEV_CLOCK_IN(STM32F4XXRCCState, lsi_rc, NULL, 0),
-    QDEV_CLOCK_IN(STM32F4XXRCCState, lse_crystal, NULL, 0),
-    QDEV_CLOCK_IN(STM32F4XXRCCState, sai1_extclk, NULL, 0),
-    QDEV_CLOCK_IN(STM32F4XXRCCState, sai2_extclk, NULL, 0),
+    QDEV_CLOCK_IN(STM32F4XXRCCState, hsi_rc, NULL, 0),
+    QDEV_CLOCK_IN(STM32F4XXRCCState, hse, NULL, 0),
+    QDEV_CLOCK_IN(STM32F4XXRCCState, i2s_extclk, NULL, 0),
     QDEV_CLOCK_END
 };
 
@@ -1224,36 +1222,19 @@ static void connect_mux_sources(STM32F4XXRCCState *s,
 
     Clock * const CLK_SRC_MAPPING[] = {
         [RCC_CLOCK_MUX_SRC_GND] = s->gnd,
-        [RCC_CLOCK_MUX_SRC_HSI] = s->hsi16_rc,
+        [RCC_CLOCK_MUX_SRC_HSI] = s->hsi_rc,
         [RCC_CLOCK_MUX_SRC_HSE] = s->hse,
-        [RCC_CLOCK_MUX_SRC_MSI] = s->msi_rc,
         [RCC_CLOCK_MUX_SRC_LSI] = s->lsi_rc,
-        [RCC_CLOCK_MUX_SRC_LSE] = s->lse_crystal,
-        [RCC_CLOCK_MUX_SRC_SAI1_EXTCLK] = s->sai1_extclk,
-        [RCC_CLOCK_MUX_SRC_SAI2_EXTCLK] = s->sai2_extclk,
-        [RCC_CLOCK_MUX_SRC_PLL] =
-            s->plls[RCC_PLL_PLL].channels[RCC_PLL_CHANNEL_PLLCLK],
-        [RCC_CLOCK_MUX_SRC_PLLSAI1] =
-            s->plls[RCC_PLL_PLLSAI1].channels[RCC_PLLSAI1_CHANNEL_PLLSAI1CLK],
-        [RCC_CLOCK_MUX_SRC_PLLSAI2] =
-            s->plls[RCC_PLL_PLLSAI2].channels[RCC_PLLSAI2_CHANNEL_PLLSAI2CLK],
-        [RCC_CLOCK_MUX_SRC_PLLSAI3] =
-            s->plls[RCC_PLL_PLL].channels[RCC_PLL_CHANNEL_PLLSAI3CLK],
-        [RCC_CLOCK_MUX_SRC_PLL48M1] =
-            s->plls[RCC_PLL_PLL].channels[RCC_PLL_CHANNEL_PLL48M1CLK],
-        [RCC_CLOCK_MUX_SRC_PLL48M2] =
-            s->plls[RCC_PLL_PLLSAI1].channels[RCC_PLLSAI1_CHANNEL_PLL48M2CLK],
-        [RCC_CLOCK_MUX_SRC_PLLADC1] =
-            s->plls[RCC_PLL_PLLSAI1].channels[RCC_PLLSAI1_CHANNEL_PLLADC1CLK],
-        [RCC_CLOCK_MUX_SRC_PLLADC2] =
-            s->plls[RCC_PLL_PLLSAI2] .channels[RCC_PLLSAI2_CHANNEL_PLLADC2CLK],
+        [RCC_CLOCK_MUX_SRC_LSE] = s->lse,
+        [RCC_CLOCK_MUX_SRC_EXTCLK] = s->i2s_extclk,
+        [RCC_CLOCK_MUX_SRC_PLL] = s->plls[RCC_PLL_PLL].channels[RCC_PLL_CHANNEL_PLLCLK],
+        [RCC_CLOCK_MUX_SRC_PLLI2SCLK] = s->plls[RCC_PLL_PLLI2S].channels[RCC_PLLSAI1_CHANNEL_PLLI2SCLK],
         [RCC_CLOCK_MUX_SRC_SYSCLK] = s->clock_muxes[RCC_CLOCK_MUX_SYSCLK].out,
         [RCC_CLOCK_MUX_SRC_HCLK] = s->clock_muxes[RCC_CLOCK_MUX_HCLK].out,
         [RCC_CLOCK_MUX_SRC_PCLK1] = s->clock_muxes[RCC_CLOCK_MUX_PCLK1].out,
         [RCC_CLOCK_MUX_SRC_PCLK2] = s->clock_muxes[RCC_CLOCK_MUX_PCLK2].out,
-        [RCC_CLOCK_MUX_SRC_HSE_OVER_32] = s->clock_muxes[RCC_CLOCK_MUX_HSE_OVER_32].out,
-        [RCC_CLOCK_MUX_SRC_LCD_AND_RTC_COMMON] =
-            s->clock_muxes[RCC_CLOCK_MUX_LCD_AND_RTC_COMMON].out,
+        [RCC_CLOCK_MUX_SRC_HSE_RTC] = s->clock_muxes[RCC_CLOCK_MUX_HSE_RTC].out,
+        [RCC_CLOCK_MUX_SRC_RTC_COMMON] = s->clock_muxes[RCC_CLOCK_MUX_RTC_COMMON].out,
     };
 
     assert(ARRAY_SIZE(CLK_SRC_MAPPING) == RCC_CLOCK_MUX_SRC_NUMBER);

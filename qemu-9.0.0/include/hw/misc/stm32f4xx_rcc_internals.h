@@ -618,45 +618,30 @@ REG32(PLLI2SCFGR, 0x84)
 
 /* Pll Channels */
 enum PllChannels {
-    RCC_PLL_CHANNEL_PLLSAI3CLK = 0,
-    RCC_PLL_CHANNEL_PLL48M1CLK = 1,
-    RCC_PLL_CHANNEL_PLLCLK = 2,
+    RCC_PLL_CHANNEL_PLLCLK = 0,
+    RCC_PLL_CHANNEL_PLL48MCLK = 1,
 };
 
-enum PllSai1Channels {
-    RCC_PLLSAI1_CHANNEL_PLLSAI1CLK = 0,
-    RCC_PLLSAI1_CHANNEL_PLL48M2CLK = 1,
-    RCC_PLLSAI1_CHANNEL_PLLADC1CLK = 2,
-};
-
-enum PllSai2Channels {
-    RCC_PLLSAI2_CHANNEL_PLLSAI2CLK = 0,
-    /* No Q channel */
-    RCC_PLLSAI2_CHANNEL_PLLADC2CLK = 2,
+/* PllI2S Channels */
+enum PllI2SChannels {
+    RCC_PLLSAI1_CHANNEL_PLLI2SCLK = 0,
 };
 
 typedef enum RccClockMuxSource {
     RCC_CLOCK_MUX_SRC_GND = 0,
     RCC_CLOCK_MUX_SRC_HSI,
     RCC_CLOCK_MUX_SRC_HSE,
-    RCC_CLOCK_MUX_SRC_MSI,
     RCC_CLOCK_MUX_SRC_LSI,
     RCC_CLOCK_MUX_SRC_LSE,
     RCC_CLOCK_MUX_SRC_PLL,
     RCC_CLOCK_MUX_SRC_PLLI2SCLK,
     RCC_CLOCK_MUX_SRC_EXTCLK,
-    RCC_CLOCK_MUX_SRC_PLLSAI2,
-    RCC_CLOCK_MUX_SRC_PLLSAI3,
-    RCC_CLOCK_MUX_SRC_PLL48M1,
-    RCC_CLOCK_MUX_SRC_PLL48M2,
-    RCC_CLOCK_MUX_SRC_PLLADC1,
-    RCC_CLOCK_MUX_SRC_PLLADC2,
     RCC_CLOCK_MUX_SRC_SYSCLK,
     RCC_CLOCK_MUX_SRC_HCLK,
     RCC_CLOCK_MUX_SRC_PCLK1,
     RCC_CLOCK_MUX_SRC_PCLK2,
     RCC_CLOCK_MUX_SRC_HSE_RTC,
-    RCC_CLOCK_MUX_SRC_RTC,
+    RCC_CLOCK_MUX_SRC_RTC_COMMON,
 
     RCC_CLOCK_MUX_SRC_NUMBER,
 } RccClockMuxSource;
@@ -676,46 +661,30 @@ static const PllInitInfo PLL_INIT_INFO[] = {
     [RCC_PLL_PLL] = {
         .name = "pll",
         .channel_name = {
-            "pllsai3clk",
-            "pll48m1clk",
-            "pllclk"
+            "pllclk",
+            "pll48mclk",
+            "null"
         },
         .channel_exists = {
-            true, true, true
+            true, true, false
         },
         /* From PLLCFGR register documentation */
         .default_channel_divider = {
-            7, 2, 2
+            2, 4, 0
         }
     },
-    [RCC_PLL_PLLSAI1] = {
-        .name = "pllsai1",
+    [RCC_PLL_PLLI2S] = {
+        .name = "plli2s",
         .channel_name = {
-            "pllsai1clk",
-            "pll48m2clk",
-            "plladc1clk"
+            "plli2sclk",
+            "null",
+            "null"
         },
         .channel_exists = {
-            true, true, true
+            false, false, true
         },
-        /* From PLLSAI1CFGR register documentation */
         .default_channel_divider = {
-            7, 2, 2
-        }
-    },
-    [RCC_PLL_PLLSAI2] = {
-        .name = "pllsai2",
-        .channel_name = {
-            "pllsai2clk",
-            NULL,
-            "plladc2clk"
-        },
-        .channel_exists = {
-            true, false, true
-        },
-        /* From PLLSAI2CFGR register documentation */
-        .default_channel_divider = {
-            7, 0, 2
+            0, 0, 2
         }
     }
 };
@@ -816,7 +785,7 @@ static const ClockMuxInitInfo CLOCK_MUX_INIT_INFO[] = {
         },
         .hidden = true,
     },
-    [RCC_CLOCK_MUX_RTC] = {
+    [RCC_CLOCK_MUX_RTC_COMMON] = {
         .name = "rtc",
         /* Same mapping as: BDCR_RTCSEL */
         .src_mapping = {
@@ -871,140 +840,140 @@ static const ClockMuxInitInfo CLOCK_MUX_INIT_INFO[] = {
     [RCC_CLOCK_MUX_OTGHSULPI] = {
         .name = "otghsulpi",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_OTGHS] = {
         .name = "otghs",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_ETHMACPTP] = {
         .name = "ethmacptp",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_ETHMACRX] = {
         .name = "ethmacrx",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_ETHMACTX] = {
         .name = "ethmactx",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_ETHMAC] = {
         .name = "ethmac",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_DMA2] = {
         .name = "dma2",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_DMA1] = {
         .name = "dma1",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_CCMDATARAM] = {
         .name = "ccmdataram",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_BKPSRAM] = {
         .name = "bkpsram",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_CRC] = {
         .name = "crc",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_GPIOI] = {
         .name = "gpioi",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_GPIOH] = {
         .name = "gpioh",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_GPIOG] = {
         .name = "gpiog",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_GPIOF] = {
         .name = "gpiof",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_GPIOE] = {
         .name = "gpioe",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_GPIOD] = {
         .name = "gpiod",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_GPIOC] = {
         .name = "gpioc",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_GPIOB] = {
         .name = "gpiob",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_GPIOA] = {
         .name = "gpioa",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
@@ -1012,35 +981,35 @@ static const ClockMuxInitInfo CLOCK_MUX_INIT_INFO[] = {
     [RCC_CLOCK_MUX_OTGFS] = {
         .name = "otgfs",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_RNG] = {
         .name = "rng",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_HASH] = {
         .name = "hash",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_CRYP] = {
         .name = "cryp",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_DCMI] = {
         .name = "dcmi",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
@@ -1048,20 +1017,14 @@ static const ClockMuxInitInfo CLOCK_MUX_INIT_INFO[] = {
     [RCC_CLOCK_MUX_FSMC] = {
         .name = "fsmc",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     /* From now on, these muxes only have one valid source */
-    [RCC_CLOCK_MUX_OPAMP] = {
-        .name = "opamp",
-        .src_mapping = {
-            RCC_CLOCK_MUX_SRC_PCLK1,
-        },
-        FILL_DEFAULT_INIT_DISABLED,
-    },
-    [RCC_CLOCK_MUX_DAC1] = {
-        .name = "dac1",
+    /* - APB1 */
+    [RCC_CLOCK_MUX_DAC] = {
+        .name = "dac",
         .src_mapping = {
             RCC_CLOCK_MUX_SRC_PCLK1,
         },
@@ -1069,17 +1032,69 @@ static const ClockMuxInitInfo CLOCK_MUX_INIT_INFO[] = {
     },
     [RCC_CLOCK_MUX_PWR] = {
         .name = "pwr",
-        /*
-         * PWREN is in the APB1ENR1 register,
-         * but PWR uses SYSCLK according to the clock tree.
-         */
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_SYSCLK,
+            RCC_CLOCK_MUX_SRC_PCLK1,
+        },
+        FILL_DEFAULT_INIT_DISABLED,
+    },
+    [RCC_CLOCK_MUX_CAN2] = {
+        .name = "can2",
+        .src_mapping = {
+            RCC_CLOCK_MUX_SRC_PCLK1,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
     [RCC_CLOCK_MUX_CAN1] = {
         .name = "can1",
+        .src_mapping = {
+            RCC_CLOCK_MUX_SRC_PCLK1,
+        },
+        FILL_DEFAULT_INIT_DISABLED,
+    },
+    [RCC_CLOCK_MUX_I2C3] = {
+        .name = "i2c3",
+        .src_mapping = {
+            RCC_CLOCK_MUX_SRC_PCLK1,
+        },
+        FILL_DEFAULT_INIT_DISABLED,
+    },
+    [RCC_CLOCK_MUX_I2C2] = {
+        .name = "i2c2",
+        .src_mapping = {
+            RCC_CLOCK_MUX_SRC_PCLK1,
+        },
+        FILL_DEFAULT_INIT_DISABLED,
+    },
+    [RCC_CLOCK_MUX_I2C1] = {
+        .name = "i2c1",
+        .src_mapping = {
+            RCC_CLOCK_MUX_SRC_PCLK1,
+        },
+        FILL_DEFAULT_INIT_DISABLED,
+    },
+    [RCC_CLOCK_MUX_UART5] = {
+        .name = "uart5",
+        .src_mapping = {
+            RCC_CLOCK_MUX_SRC_PCLK1,
+        },
+        FILL_DEFAULT_INIT_DISABLED,
+    },
+    [RCC_CLOCK_MUX_UART4] = {
+        .name = "uart4",
+        .src_mapping = {
+            RCC_CLOCK_MUX_SRC_PCLK1,
+        },
+        FILL_DEFAULT_INIT_DISABLED,
+    },
+    [RCC_CLOCK_MUX_USART3] = {
+        .name = "usart3",
+        .src_mapping = {
+            RCC_CLOCK_MUX_SRC_PCLK1,
+        },
+        FILL_DEFAULT_INIT_DISABLED,
+    },
+    [RCC_CLOCK_MUX_USART2] = {
+        .name = "usart2",
         .src_mapping = {
             RCC_CLOCK_MUX_SRC_PCLK1,
         },
@@ -1106,10 +1121,24 @@ static const ClockMuxInitInfo CLOCK_MUX_INIT_INFO[] = {
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
-    [RCC_CLOCK_MUX_LCD] = {
-        .name = "lcd",
+    [RCC_CLOCK_MUX_TIM14] = {
+        .name = "tim14",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_LCD_AND_RTC_COMMON,
+            RCC_CLOCK_MUX_SRC_PCLK1,
+        },
+        FILL_DEFAULT_INIT_DISABLED,
+    },
+    [RCC_CLOCK_MUX_TIM13] = {
+        .name = "tim13",
+        .src_mapping = {
+            RCC_CLOCK_MUX_SRC_PCLK1,
+        },
+        FILL_DEFAULT_INIT_DISABLED,
+    },
+    [RCC_CLOCK_MUX_TIM12] = {
+        .name = "tim12",
+        .src_mapping = {
+            RCC_CLOCK_MUX_SRC_PCLK1,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
@@ -1155,57 +1184,23 @@ static const ClockMuxInitInfo CLOCK_MUX_INIT_INFO[] = {
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
-    [RCC_CLOCK_MUX_TIM17] = {
-        .name = "tim17",
+    /* - APB2 */
+    [RCC_CLOCK_MUX_TIM11] = {
+        .name = "tim11",
         .src_mapping = {
             RCC_CLOCK_MUX_SRC_PCLK2,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
-    [RCC_CLOCK_MUX_TIM16] = {
-        .name = "tim16",
+    [RCC_CLOCK_MUX_TIM10] = {
+        .name = "tim10",
         .src_mapping = {
             RCC_CLOCK_MUX_SRC_PCLK2,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
-    [RCC_CLOCK_MUX_TIM15] = {
-        .name = "tim15",
-        .src_mapping = {
-            RCC_CLOCK_MUX_SRC_PCLK2,
-        },
-        FILL_DEFAULT_INIT_DISABLED,
-    },
-    [RCC_CLOCK_MUX_TIM8] = {
-        .name = "tim8",
-        .src_mapping = {
-            RCC_CLOCK_MUX_SRC_PCLK2,
-        },
-        FILL_DEFAULT_INIT_DISABLED,
-    },
-    [RCC_CLOCK_MUX_SPI1] = {
-        .name = "spi1",
-        .src_mapping = {
-            RCC_CLOCK_MUX_SRC_PCLK2,
-        },
-        FILL_DEFAULT_INIT_DISABLED,
-    },
-    [RCC_CLOCK_MUX_TIM1] = {
-        .name = "tim1",
-        .src_mapping = {
-            RCC_CLOCK_MUX_SRC_PCLK2,
-        },
-        FILL_DEFAULT_INIT_DISABLED,
-    },
-    [RCC_CLOCK_MUX_SDMMC1] = {
-        .name = "sdmmc1",
-        .src_mapping = {
-            RCC_CLOCK_MUX_SRC_PCLK2,
-        },
-        FILL_DEFAULT_INIT_DISABLED,
-    },
-    [RCC_CLOCK_MUX_FW] = {
-        .name = "fw",
+    [RCC_CLOCK_MUX_TIM9] = {
+        .name = "tim9",
         .src_mapping = {
             RCC_CLOCK_MUX_SRC_PCLK2,
         },
@@ -1218,17 +1213,80 @@ static const ClockMuxInitInfo CLOCK_MUX_INIT_INFO[] = {
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
-    [RCC_CLOCK_MUX_RTC] = {
-        .name = "rtc",
+    [RCC_CLOCK_MUX_SPI1] = {
+        .name = "spi1",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_LCD_AND_RTC_COMMON,
+            RCC_CLOCK_MUX_SRC_PCLK2,
         },
         FILL_DEFAULT_INIT_DISABLED,
     },
-    [RCC_CLOCK_MUX_CORTEX_FCLK] = {
-        .name = "cortex-fclk",
+    [RCC_CLOCK_MUX_SDIO] = {
+        .name = "sdio",
         .src_mapping = {
-            RCC_CLOCK_MUX_SRC_HCLK,
+            RCC_CLOCK_MUX_SRC_PCLK2,
+        },
+        FILL_DEFAULT_INIT_DISABLED,
+    },
+    [RCC_CLOCK_MUX_ADC3] = {
+        .name = "adc3",
+        .src_mapping = {
+            RCC_CLOCK_MUX_SRC_PCLK2,
+        },
+        FILL_DEFAULT_INIT_DISABLED,
+    },
+    [RCC_CLOCK_MUX_ADC2] = {
+        .name = "adc2",
+        .src_mapping = {
+            RCC_CLOCK_MUX_SRC_PCLK2,
+        },
+        FILL_DEFAULT_INIT_DISABLED,
+    },
+    [RCC_CLOCK_MUX_ADC1] = {
+        .name = "adc1",
+        .src_mapping = {
+            RCC_CLOCK_MUX_SRC_PCLK2,
+        },
+        FILL_DEFAULT_INIT_DISABLED,
+    },
+    [RCC_CLOCK_MUX_USART6] = {
+        .name = "usart6",
+        .src_mapping = {
+            RCC_CLOCK_MUX_SRC_PCLK2,
+        },
+        FILL_DEFAULT_INIT_DISABLED,
+    },
+    [RCC_CLOCK_MUX_USART1] = {
+        .name = "usart1",
+        .src_mapping = {
+            RCC_CLOCK_MUX_SRC_PCLK2,
+        },
+        FILL_DEFAULT_INIT_DISABLED,
+    },
+    [RCC_CLOCK_MUX_TIM8] = {
+        .name = "tim8",
+        .src_mapping = {
+            RCC_CLOCK_MUX_SRC_PCLK2,
+        },
+        FILL_DEFAULT_INIT_DISABLED,
+    },
+    [RCC_CLOCK_MUX_TIM1] = {
+        .name = "tim1",
+        .src_mapping = {
+            RCC_CLOCK_MUX_SRC_PCLK2,
+        },
+        FILL_DEFAULT_INIT_DISABLED,
+    },
+    [RCC_CLOCK_MUX_RTC] = {
+        .name = "rtc",
+        .src_mapping = {
+            RCC_CLOCK_MUX_SRC_RTC_COMMON
+        },
+        FILL_DEFAULT_INIT_DISABLED,
+    },
+    [RCC_CLOCK_MUX_SSCG] = {
+        .name = "sscg",
+        .src_mapping = {
+            RCC_CLOCK_MUX_SRC_PLL,
         },
         FILL_DEFAULT_INIT_ENABLED,
     },
