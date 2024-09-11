@@ -537,8 +537,8 @@ static void rcc_update_cr_register(STM32F4XXRCCState *s, uint32_t previous_value
             clock_update(s->msi_rc, 0);
         }
     }
-#endif
     rcc_update_irq(s);
+#endif
 }
 
 static void rcc_update_cfgr_register(STM32F4XXRCCState *s)
@@ -877,8 +877,8 @@ static void rcc_update_bdcr(STM32F4XXRCCState *s)
         clock_update(s->lse_crystal, 0);
         s->bdcr &= ~R_BDCR_LSERDY_MASK;
     }
-#endif
     rcc_update_irq(s);
+#endif
 }
 
 static void rcc_update_csr(STM32F4XXRCCState *s)
@@ -906,8 +906,8 @@ static void rcc_update_csr(STM32F4XXRCCState *s)
         clock_update(s->lsi_rc, 0);
         s->csr &= ~R_CSR_LSIRDY_MASK;
     }
-#endif
     rcc_update_irq(s);
+#endif
 }
 
 static void stm32f4xx_rcc_reset_hold(Object *obj)
