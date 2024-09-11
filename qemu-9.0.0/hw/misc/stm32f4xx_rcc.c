@@ -372,11 +372,13 @@ static void rcc_update_irq(STM32F4XXRCCState *s)
     /*
      * TODO: Handle LSECSSF and CSSF flags when the CSS is implemented.
      */
+#if 0
     if (s->cifr & CIFR_IRQ_MASK) {
         qemu_irq_raise(s->irq);
     } else {
         qemu_irq_lower(s->irq);
     }
+#endif
 }
 
 static void rcc_update_msi(STM32F4XXRCCState *s, uint32_t previous_value)
@@ -665,9 +667,9 @@ static void rcc_update_apb1enr(STM32F4XXRCCState *s)
 {
     #define APB1ENR_SET_ENABLE(_peripheral_name) \
         clock_mux_set_enable(&s->clock_muxes[RCC_CLOCK_MUX_##_peripheral_name], \
-            FIELD_EX32(s->apb1enr, APB1ENR1, _peripheral_name##EN))
+            FIELD_EX32(s->apb1enr, APB1ENR, _peripheral_name##EN))
 
-    /* APB1ENR1 */
+    /* APB1ENR */
     APB1ENR_SET_ENABLE(DAC);
     APB1ENR_SET_ENABLE(PWR);
     APB1ENR_SET_ENABLE(CAN2);
@@ -992,10 +994,10 @@ static uint64_t stm32f4xx_rcc_read(void *opaque, hwaddr addr,
     case A_APB2ENR:
         retvalue = s->apb2enr;
         break;
-    case AHB1LPENR:
+    case A_AHB1LPENR:
         retvalue = s->ahb1lpenr;
         break;
-    case AHB2LPENR:
+    case A_AHB2LPENR:
         retvalue = s->ahb2lpenr;
         break;
     case A_AHB3LPENR:
@@ -1272,18 +1274,17 @@ static const VMStateDescription vmstate_stm32f4xx_rcc = {
         VMSTATE_UINT32(ahb2lpenr, STM32F4XXRCCState),
         VMSTATE_UINT32(ahb3lpenr, STM32F4XXRCCState),
         VMSTATE_UINT32(apb1lpenr, STM32F4XXRCCState),
-        VMSTATE_UINT32(apb2lpenr2, STM32F4XXRCCState),
+        VMSTATE_UINT32(apb2lpenr, STM32F4XXRCCState),
         VMSTATE_UINT32(bdcr, STM32F4XXRCCState),
         VMSTATE_UINT32(csr, STM32F4XXRCCState),
-        VMSTATE_CLOCK(sscgr, STM32F4XXRCCState),
-        VMSTATE_CLOCK(plli2scfgr, STM32F4XXRCCState),
-        VMSTATE_CLOCK(hsi16_rc, STM32F4XXRCCState),
-        VMSTATE_CLOCK(msi_rc, STM32F4XXRCCState),
-        VMSTATE_CLOCK(hse, STM32F4XXRCCState),
+        VMSTATE_UINT32(sscgr, STM32F4XXRCCState),
+        VMSTATE_UINT32(plli2scfgr, STM32F4XXRCCState),
+
+        VMSTATE_CLOCK(lse, STM32F4XXRCCState),
         VMSTATE_CLOCK(lsi_rc, STM32F4XXRCCState),
-        VMSTATE_CLOCK(lse_crystal, STM32F4XXRCCState),
-        VMSTATE_CLOCK(sai1_extclk, STM32F4XXRCCState),
-        VMSTATE_CLOCK(sai2_extclk, STM32F4XXRCCState),
+        VMSTATE_CLOCK(hsi_rc, STM32F4XXRCCState),
+        VMSTATE_CLOCK(hse, STM32F4XXRCCState),
+        VMSTATE_CLOCK(i2s_extclk, STM32F4XXRCCState),
         VMSTATE_END_OF_LIST()
     }
 };
