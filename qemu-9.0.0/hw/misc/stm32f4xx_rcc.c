@@ -369,9 +369,6 @@ static void pll_set_channel_divider(RccPllState *pll,
 
 static void rcc_update_irq(STM32F4XXRCCState *s)
 {
-    /*
-     * TODO: Handle LSECSSF and CSSF flags when the CSS is implemented.
-     */
 #if 0
     if (s->cifr & CIFR_IRQ_MASK) {
         qemu_irq_raise(s->irq);
@@ -415,7 +412,7 @@ static void rcc_update_msi(STM32F4XXRCCState *s, uint32_t previous_value)
 
 /*
  * TODO: Add write-protection for all registers:
- * DONE: CR
+ * 
  */
 
 static void rcc_update_cr_register(STM32F4XXRCCState *s, uint32_t previous_value)
@@ -703,6 +700,7 @@ static void rcc_update_apb2enr(STM32F4XXRCCState *s)
         clock_mux_set_enable(&s->clock_muxes[RCC_CLOCK_MUX_##_peripheral_name], \
             FIELD_EX32(s->apb2enr, APB2ENR, _peripheral_name##EN))
 
+    /* APB2ENR */
     APB2ENR_SET_ENABLE(TIM11);
     APB2ENR_SET_ENABLE(TIM10);
     APB2ENR_SET_ENABLE(TIM9);
