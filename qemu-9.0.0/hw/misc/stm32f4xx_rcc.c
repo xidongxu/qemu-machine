@@ -381,6 +381,7 @@ static void rcc_update_irq(STM32F4XXRCCState *s)
 
 static void rcc_update_msi(STM32F4XXRCCState *s, uint32_t previous_value)
 {
+#if 0
     uint32_t val;
 
     static const uint32_t msirange[] = {
@@ -407,6 +408,7 @@ static void rcc_update_msi(STM32F4XXRCCState *s, uint32_t previous_value)
         s->cr = (s->cr & ~R_CSR_MSISRANGE_MASK) |
                 (previous_value & R_CSR_MSISRANGE_MASK);
     }
+#endif
 }
 
 /*
@@ -416,6 +418,7 @@ static void rcc_update_msi(STM32F4XXRCCState *s, uint32_t previous_value)
 
 static void rcc_update_cr_register(STM32F4XXRCCState *s, uint32_t previous_value)
 {
+#if 0
     int val;
     const RccClockMuxSource current_pll_src =
         CLOCK_MUX_INIT_INFO[RCC_CLOCK_MUX_PLL_INPUT].src_mapping[
@@ -535,11 +538,13 @@ static void rcc_update_cr_register(STM32F4XXRCCState *s, uint32_t previous_value
             clock_update(s->msi_rc, 0);
         }
     }
+#endif
     rcc_update_irq(s);
 }
 
 static void rcc_update_cfgr_register(STM32F4XXRCCState *s)
 {
+#if 0
     uint32_t val;
     /* MCOPRE */
     val = FIELD_EX32(s->cfgr, CFGR, MCOPRE);
@@ -597,6 +602,7 @@ static void rcc_update_cfgr_register(STM32F4XXRCCState *s)
                          val);
     s->cfgr &= ~R_CFGR_SWS_MASK;
     s->cfgr |= val << R_CFGR_SWS_SHIFT;
+#endif
 }
 
 static void rcc_update_ahb1enr(STM32F4XXRCCState *s)
@@ -605,12 +611,26 @@ static void rcc_update_ahb1enr(STM32F4XXRCCState *s)
         clock_mux_set_enable(&s->clock_muxes[RCC_CLOCK_MUX_##_peripheral_name], \
             FIELD_EX32(s->ahb1enr, AHB1ENR, _peripheral_name##EN))
 
-    /* DMA2DEN: reserved for STM32L475xx */
-    AHB1ENR_SET_ENABLE(TSC);
-    AHB1ENR_SET_ENABLE(CRC);
-    AHB1ENR_SET_ENABLE(FLASH);
+    AHB1ENR_SET_ENABLE(OTGHSULPI);
+    AHB1ENR_SET_ENABLE(OTGHS);
+    AHB1ENR_SET_ENABLE(ETHMACPTP);
+    AHB1ENR_SET_ENABLE(ETHMACRX);
+    AHB1ENR_SET_ENABLE(ETHMACTX);
+    AHB1ENR_SET_ENABLE(ETHMAC);
     AHB1ENR_SET_ENABLE(DMA2);
     AHB1ENR_SET_ENABLE(DMA1);
+    AHB1ENR_SET_ENABLE(CCMDATARAM);
+    AHB1ENR_SET_ENABLE(BKPSRAM);
+    AHB1ENR_SET_ENABLE(CRC);
+    AHB1ENR_SET_ENABLE(GPIOI);
+    AHB1ENR_SET_ENABLE(GPIOH);
+    AHB1ENR_SET_ENABLE(GPIOG);
+    AHB1ENR_SET_ENABLE(GPIOF);
+    AHB1ENR_SET_ENABLE(GPIOE);
+    AHB1ENR_SET_ENABLE(GPIOD);
+    AHB1ENR_SET_ENABLE(GPIOC);
+    AHB1ENR_SET_ENABLE(GPIOB);
+    AHB1ENR_SET_ENABLE(GPIOA);
 
     #undef AHB1ENR_SET_ENABLE
 }
@@ -621,21 +641,11 @@ static void rcc_update_ahb2enr(STM32F4XXRCCState *s)
         clock_mux_set_enable(&s->clock_muxes[RCC_CLOCK_MUX_##_peripheral_name], \
             FIELD_EX32(s->ahb2enr, AHB2ENR, _peripheral_name##EN))
 
-    AHB2ENR_SET_ENABLE(RNG);
-    /* HASHEN: reserved for STM32L475xx */
-    AHB2ENR_SET_ENABLE(AES);
-    /* DCMIEN: reserved for STM32L475xx */
-    AHB2ENR_SET_ENABLE(ADC);
     AHB2ENR_SET_ENABLE(OTGFS);
-    /* GPIOIEN: reserved for STM32L475xx */
-    AHB2ENR_SET_ENABLE(GPIOA);
-    AHB2ENR_SET_ENABLE(GPIOB);
-    AHB2ENR_SET_ENABLE(GPIOC);
-    AHB2ENR_SET_ENABLE(GPIOD);
-    AHB2ENR_SET_ENABLE(GPIOE);
-    AHB2ENR_SET_ENABLE(GPIOF);
-    AHB2ENR_SET_ENABLE(GPIOG);
-    AHB2ENR_SET_ENABLE(GPIOH);
+    AHB2ENR_SET_ENABLE(RNG);
+    AHB2ENR_SET_ENABLE(HASH);
+    AHB2ENR_SET_ENABLE(CRYP);
+    AHB2ENR_SET_ENABLE(DCMI);
 
     #undef AHB2ENR_SET_ENABLE
 }
@@ -646,56 +656,43 @@ static void rcc_update_ahb3enr(STM32F4XXRCCState *s)
         clock_mux_set_enable(&s->clock_muxes[RCC_CLOCK_MUX_##_peripheral_name], \
             FIELD_EX32(s->ahb3enr, AHB3ENR, _peripheral_name##EN))
 
-    AHB3ENR_SET_ENABLE(QSPI);
-    AHB3ENR_SET_ENABLE(FMC);
+    AHB3ENR_SET_ENABLE(FSMC);
 
     #undef AHB3ENR_SET_ENABLE
 }
 
 static void rcc_update_apb1enr(STM32F4XXRCCState *s)
 {
-    #define APB1ENR1_SET_ENABLE(_peripheral_name) \
+    #define APB1ENR_SET_ENABLE(_peripheral_name) \
         clock_mux_set_enable(&s->clock_muxes[RCC_CLOCK_MUX_##_peripheral_name], \
-            FIELD_EX32(s->apb1enr1, APB1ENR1, _peripheral_name##EN))
-    #define APB1ENR2_SET_ENABLE(_peripheral_name) \
-        clock_mux_set_enable(&s->clock_muxes[RCC_CLOCK_MUX_##_peripheral_name], \
-            FIELD_EX32(s->apb1enr2, APB1ENR2, _peripheral_name##EN))
+            FIELD_EX32(s->apb1enr, APB1ENR1, _peripheral_name##EN))
 
     /* APB1ENR1 */
-    APB1ENR1_SET_ENABLE(LPTIM1);
-    APB1ENR1_SET_ENABLE(OPAMP);
-    APB1ENR1_SET_ENABLE(DAC1);
-    APB1ENR1_SET_ENABLE(PWR);
-    /* CAN2: reserved for STM32L4x5 */
-    APB1ENR1_SET_ENABLE(CAN1);
-    /* CRSEN: reserved for STM32L4x5 */
-    APB1ENR1_SET_ENABLE(I2C3);
-    APB1ENR1_SET_ENABLE(I2C2);
-    APB1ENR1_SET_ENABLE(I2C1);
-    APB1ENR1_SET_ENABLE(UART5);
-    APB1ENR1_SET_ENABLE(UART4);
-    APB1ENR1_SET_ENABLE(USART3);
-    APB1ENR1_SET_ENABLE(USART2);
-    APB1ENR1_SET_ENABLE(SPI3);
-    APB1ENR1_SET_ENABLE(SPI2);
-    APB1ENR1_SET_ENABLE(WWDG);
-    /* RTCAPB: reserved for STM32L4x5 */
-    APB1ENR1_SET_ENABLE(LCD);
-    APB1ENR1_SET_ENABLE(TIM7);
-    APB1ENR1_SET_ENABLE(TIM6);
-    APB1ENR1_SET_ENABLE(TIM5);
-    APB1ENR1_SET_ENABLE(TIM4);
-    APB1ENR1_SET_ENABLE(TIM3);
-    APB1ENR1_SET_ENABLE(TIM2);
+    APB1ENR_SET_ENABLE(DAC);
+    APB1ENR_SET_ENABLE(PWR);
+    APB1ENR_SET_ENABLE(CAN2);
+    APB1ENR_SET_ENABLE(CAN1);
+    APB1ENR_SET_ENABLE(I2C3);
+    APB1ENR_SET_ENABLE(I2C2);
+    APB1ENR_SET_ENABLE(I2C1);
+    APB1ENR_SET_ENABLE(UART5);
+    APB1ENR_SET_ENABLE(UART4);
+    APB1ENR_SET_ENABLE(USART3);
+    APB1ENR_SET_ENABLE(USART2);
+    APB1ENR_SET_ENABLE(SPI3);
+    APB1ENR_SET_ENABLE(SPI2);
+    APB1ENR_SET_ENABLE(WWDG);
+    APB1ENR_SET_ENABLE(TIM14);
+    APB1ENR_SET_ENABLE(TIM13);
+    APB1ENR_SET_ENABLE(TIM12);
+    APB1ENR_SET_ENABLE(TIM7);
+    APB1ENR_SET_ENABLE(TIM6);
+    APB1ENR_SET_ENABLE(TIM5);
+    APB1ENR_SET_ENABLE(TIM4);
+    APB1ENR_SET_ENABLE(TIM3);
+    APB1ENR_SET_ENABLE(TIM2);
 
-    /* APB1ENR2 */
-    APB1ENR2_SET_ENABLE(LPTIM2);
-    APB1ENR2_SET_ENABLE(SWPMI1);
-    /* I2C4EN: reserved for STM32L4x5 */
-    APB1ENR2_SET_ENABLE(LPUART1);
-
-    #undef APB1ENR1_SET_ENABLE
-    #undef APB1ENR2_SET_ENABLE
+    #undef APB1ENR_SET_ENABLE
 }
 
 static void rcc_update_apb2enr(STM32F4XXRCCState *s)
@@ -704,19 +701,19 @@ static void rcc_update_apb2enr(STM32F4XXRCCState *s)
         clock_mux_set_enable(&s->clock_muxes[RCC_CLOCK_MUX_##_peripheral_name], \
             FIELD_EX32(s->apb2enr, APB2ENR, _peripheral_name##EN))
 
-    APB2ENR_SET_ENABLE(DFSDM1);
-    APB2ENR_SET_ENABLE(SAI2);
-    APB2ENR_SET_ENABLE(SAI1);
-    APB2ENR_SET_ENABLE(TIM17);
-    APB2ENR_SET_ENABLE(TIM16);
-    APB2ENR_SET_ENABLE(TIM15);
+    APB2ENR_SET_ENABLE(TIM11);
+    APB2ENR_SET_ENABLE(TIM10);
+    APB2ENR_SET_ENABLE(TIM9);
+    APB2ENR_SET_ENABLE(SYSCFG);
+    APB2ENR_SET_ENABLE(SPI1);
+    APB2ENR_SET_ENABLE(SDIO);
+    APB2ENR_SET_ENABLE(ADC3);
+    APB2ENR_SET_ENABLE(ADC2);
+    APB2ENR_SET_ENABLE(ADC1);
+    APB2ENR_SET_ENABLE(USART6);
     APB2ENR_SET_ENABLE(USART1);
     APB2ENR_SET_ENABLE(TIM8);
-    APB2ENR_SET_ENABLE(SPI1);
     APB2ENR_SET_ENABLE(TIM1);
-    APB2ENR_SET_ENABLE(SDMMC1);
-    APB2ENR_SET_ENABLE(FW);
-    APB2ENR_SET_ENABLE(SYSCFG);
 
     #undef APB2ENR_SET_ENABLE
 }
@@ -728,6 +725,7 @@ static void rcc_update_apb2enr(STM32F4XXRCCState *s)
  */
 static void rcc_update_pllsaixcfgr(STM32F4XXRCCState *s, RccPll pll_id)
 {
+#if 0
     uint32_t reg, val;
     switch (pll_id) {
     case RCC_PLL_PLL:
@@ -784,10 +782,12 @@ static void rcc_update_pllsaixcfgr(STM32F4XXRCCState *s, RccPll pll_id)
     /* PLLN */
     val = FIELD_EX32(reg, PLLCFGR, PLLN);
     pll_set_vco_multiplier(&s->plls[pll_id], val);
+#endif
 }
 
 static void rcc_update_pllcfgr(STM32F4XXRCCState *s)
 {
+#if 0
     int val;
 
     /* Use common layout */
@@ -807,6 +807,7 @@ static void rcc_update_pllcfgr(STM32F4XXRCCState *s)
         clock_mux_set_source(&s->clock_muxes[RCC_CLOCK_MUX_PLL_INPUT], val - 1);
         clock_mux_set_enable(&s->clock_muxes[RCC_CLOCK_MUX_PLL_INPUT], true);
     }
+#endif
 }
 
 static void rcc_update_ccipr(STM32F4XXRCCState *s)
@@ -814,7 +815,7 @@ static void rcc_update_ccipr(STM32F4XXRCCState *s)
     #define CCIPR_SET_SOURCE(_peripheral_name) \
         clock_mux_set_source(&s->clock_muxes[RCC_CLOCK_MUX_##_peripheral_name], \
             FIELD_EX32(s->ccipr, CCIPR, _peripheral_name##SEL))
-
+#if 0
     CCIPR_SET_SOURCE(DFSDM1);
     CCIPR_SET_SOURCE(SWPMI1);
     CCIPR_SET_SOURCE(ADC);
@@ -832,12 +833,13 @@ static void rcc_update_ccipr(STM32F4XXRCCState *s)
     CCIPR_SET_SOURCE(USART3);
     CCIPR_SET_SOURCE(USART2);
     CCIPR_SET_SOURCE(USART1);
-
+#endif
     #undef CCIPR_SET_SOURCE
 }
 
 static void rcc_update_bdcr(STM32F4XXRCCState *s)
 {
+#if 0
     int val;
 
     /* LSCOSEL */
@@ -875,12 +877,13 @@ static void rcc_update_bdcr(STM32F4XXRCCState *s)
         clock_update(s->lse_crystal, 0);
         s->bdcr &= ~R_BDCR_LSERDY_MASK;
     }
-
+#endif
     rcc_update_irq(s);
 }
 
 static void rcc_update_csr(STM32F4XXRCCState *s)
 {
+#if 0
     int val;
 
     /* Reset flags: Not implemented */
@@ -903,7 +906,7 @@ static void rcc_update_csr(STM32F4XXRCCState *s)
         clock_update(s->lsi_rc, 0);
         s->csr &= ~R_CSR_LSIRDY_MASK;
     }
-
+#endif
     rcc_update_irq(s);
 }
 
@@ -1323,19 +1326,19 @@ static void stm32f4xx_rcc_realize(DeviceState *dev, Error **errp)
      * Start clocks after everything is connected
      * to propagate the frequencies along the tree.
      */
+#if 0
     clock_update_hz(s->msi_rc, MSI_DEFAULT_FRQ);
     clock_update_hz(s->sai1_extclk, s->sai1_extclk_frequency);
     clock_update_hz(s->sai2_extclk, s->sai2_extclk_frequency);
+#endif
     clock_update(s->gnd, 0);
 }
 
 static Property stm32f4xx_rcc_properties[] = {
     DEFINE_PROP_UINT64("hse_frequency", STM32F4XXRCCState,
         hse_frequency, HSE_DEFAULT_FRQ),
-    DEFINE_PROP_UINT64("sai1_extclk_frequency", STM32F4XXRCCState,
-        sai1_extclk_frequency, 0),
-    DEFINE_PROP_UINT64("sai2_extclk_frequency", STM32F4XXRCCState,
-        sai2_extclk_frequency, 0),
+    DEFINE_PROP_UINT64("i2s_extclk_frequency", STM32F4XXRCCState,
+        i2s_extclk_frequency, 0),
     DEFINE_PROP_END_OF_LIST(),
 };
 
