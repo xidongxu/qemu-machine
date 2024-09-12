@@ -369,45 +369,11 @@ static void pll_set_channel_divider(RccPllState *pll,
 
 static void rcc_update_irq(STM32F4XXRCCState *s)
 {
-#if 0
-    if (s->cifr & CIFR_IRQ_MASK) {
+    if (s->cir & CIR_RO_MASK) {
         qemu_irq_raise(s->irq);
     } else {
         qemu_irq_lower(s->irq);
     }
-#endif
-}
-
-static void rcc_update_msi(STM32F4XXRCCState *s, uint32_t previous_value)
-{
-#if 0
-    uint32_t val;
-
-    static const uint32_t msirange[] = {
-        100000, 200000, 400000, 800000, 1000000, 2000000,
-        4000000, 8000000, 16000000, 24000000, 32000000, 48000000
-    };
-    /* MSIRANGE and MSIRGSEL */
-    val = extract32(s->cr, R_CR_MSIRGSEL_SHIFT, R_CR_MSIRGSEL_LENGTH);
-    if (val) {
-        /* MSIRGSEL is set, use the MSIRANGE field */
-        val = extract32(s->cr, R_CR_MSIRANGE_SHIFT, R_CR_MSIRANGE_LENGTH);
-    } else {
-        /* MSIRGSEL is not set, use the MSISRANGE field */
-        val = extract32(s->csr, R_CSR_MSISRANGE_SHIFT, R_CSR_MSISRANGE_LENGTH);
-    }
-
-    if (val < ARRAY_SIZE(msirange)) {
-        clock_update_hz(s->msi_rc, msirange[val]);
-    } else {
-        /*
-         * There is a hardware write protection if the value is out of bound.
-         * Restore the previous value.
-         */
-        s->cr = (s->cr & ~R_CSR_MSISRANGE_MASK) |
-                (previous_value & R_CSR_MSISRANGE_MASK);
-    }
-#endif
 }
 
 /*
@@ -510,35 +476,8 @@ static void rcc_update_cr_register(STM32F4XXRCCState *s, uint32_t previous_value
             s->cr &= ~R_CR_HSIRDY_MASK;
         }
     }
-
-    /* MSIPLLEN: TODO */
-
-    /*
-     * MSION and update MSIRDY
-     * Set by hardware when used directly or indirectly as system clock.
-     */
-    if (FIELD_EX32(s->cfgr, CFGR, SWS) == 0b00 ||
-        current_pll_src == RCC_CLOCK_MUX_SRC_MSI) {
-            s->cr |= (R_CR_MSION_MASK | R_CR_MSIRDY_MASK);
-            if (!(previous_value & R_CR_MSION_MASK) && (s->cier & R_CIER_MSIRDYIE_MASK)) {
-                s->cifr |= R_CIFR_MSIRDYF_MASK;
-            }
-            rcc_update_msi(s, previous_value);
-    } else {
-        val = FIELD_EX32(s->cr, CR, MSION);
-        if (val) {
-            s->cr |= R_CR_MSIRDY_MASK;
-            rcc_update_msi(s, previous_value);
-            if (s->cier & R_CIER_MSIRDYIE_MASK) {
-                s->cifr |= R_CIFR_MSIRDYF_MASK;
-            }
-        } else {
-            s->cr &= ~R_CR_MSIRDY_MASK;
-            clock_update(s->msi_rc, 0);
-        }
-    }
-    rcc_update_irq(s);
 #endif
+    rcc_update_irq(s);
 }
 
 static void rcc_update_cfgr_register(STM32F4XXRCCState *s)
