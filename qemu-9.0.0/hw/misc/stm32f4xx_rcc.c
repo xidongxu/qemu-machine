@@ -383,30 +383,20 @@ static void rcc_update_irq(STM32F4XXRCCState *s)
 
 static void rcc_update_cr_register(STM32F4XXRCCState *s, uint32_t previous_value)
 {
-#if 0
     int val;
     const RccClockMuxSource current_pll_src =
         CLOCK_MUX_INIT_INFO[RCC_CLOCK_MUX_PLL_INPUT].src_mapping[
             s->clock_muxes[RCC_CLOCK_MUX_PLL_INPUT].src];
 
-    /* PLLSAI2ON and update PLLSAI2RDY */
-    val = FIELD_EX32(s->cr, CR, PLLSAI2ON);
-    pll_set_enable(&s->plls[RCC_PLL_PLLSAI2], val);
-    s->cr = (s->cr & ~R_CR_PLLSAI2RDY_MASK) |
-            (val << R_CR_PLLSAI2RDY_SHIFT);
-    if (s->cier & R_CIER_PLLSAI2RDYIE_MASK) {
-        s->cifr |= R_CIFR_PLLSAI2RDYF_MASK;
+    /* PLLI2SON and update PLLI2SRDY */
+    val = FIELD_EX32(s->cr, CR, PLLI2SON);
+    pll_set_enable(&s->plls[RCC_PLL_PLLI2S], val);
+    s->cr = (s->cr & ~R_CR_PLLI2SRDY_MASK) |
+            (val << R_CR_PLLI2SRDY_SHIFT);
+    if (s->cir & R_CIR_PLLI2SRDYIE_MASK) {
+        s->cir |= R_CIR_PLLI2SRDYF_MASK;
     }
-
-    /* PLLSAI1ON and update PLLSAI1RDY */
-    val = FIELD_EX32(s->cr, CR, PLLSAI1ON);
-    pll_set_enable(&s->plls[RCC_PLL_PLLSAI1], val);
-    s->cr = (s->cr & ~R_CR_PLLSAI1RDY_MASK) |
-            (val << R_CR_PLLSAI1RDY_SHIFT);
-    if (s->cier & R_CIER_PLLSAI1RDYIE_MASK) {
-        s->cifr |= R_CIFR_PLLSAI1RDYF_MASK;
-    }
-
+#if 0
     /*
      * PLLON and update PLLRDY
      * PLLON cannot be reset if the PLL clock is used as the system clock.
