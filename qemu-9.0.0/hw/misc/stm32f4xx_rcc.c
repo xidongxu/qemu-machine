@@ -396,18 +396,18 @@ static void rcc_update_cr_register(STM32F4XXRCCState *s, uint32_t previous_value
     if (s->cir & R_CIR_PLLI2SRDYIE_MASK) {
         s->cir |= R_CIR_PLLI2SRDYF_MASK;
     }
-#if 0
+
     /*
      * PLLON and update PLLRDY
      * PLLON cannot be reset if the PLL clock is used as the system clock.
      */
     val = FIELD_EX32(s->cr, CR, PLLON);
-    if (FIELD_EX32(s->cfgr, CFGR, SWS) != 0b11) {
+    if (FIELD_EX32(s->cfgr, CFGR, SWS) != 0b10) {
         pll_set_enable(&s->plls[RCC_PLL_PLL], val);
         s->cr = (s->cr & ~R_CR_PLLRDY_MASK) |
                 (val << R_CR_PLLRDY_SHIFT);
-        if (s->cier & R_CIER_PLLRDYIE_MASK) {
-            s->cifr |= R_CIFR_PLLRDYF_MASK;
+        if (s->cier & R_CIR_PLLRDYIE_MASK) {
+            s->cifr |= R_CIR_PLLRDYF_MASK;
         }
     } else {
         s->cr |= R_CR_PLLON_MASK;
@@ -422,14 +422,14 @@ static void rcc_update_cr_register(STM32F4XXRCCState *s, uint32_t previous_value
      * indirectly as the system clock.
      */
     val = FIELD_EX32(s->cr, CR, HSEON);
-    if (FIELD_EX32(s->cfgr, CFGR, SWS) != 0b10 &&
+    if (FIELD_EX32(s->cfgr, CFGR, SWS) != 0b01 &&
         current_pll_src != RCC_CLOCK_MUX_SRC_HSE) {
         s->cr = (s->cr & ~R_CR_HSERDY_MASK) |
                 (val << R_CR_HSERDY_SHIFT);
         if (val) {
             clock_update_hz(s->hse, s->hse_frequency);
-            if (s->cier & R_CIER_HSERDYIE_MASK) {
-                s->cifr |= R_CIFR_HSERDYF_MASK;
+            if (s->cier & R_CIR_HSERDYIE_MASK) {
+                s->cifr |= R_CIR_HSERDYF_MASK;
             }
         } else {
             clock_update(s->hse, 0);
@@ -446,27 +446,26 @@ static void rcc_update_cr_register(STM32F4XXRCCState *s, uint32_t previous_value
      * HSION is set by hardware if the HSI16 is used directly
      * or indirectly as system clock.
      */
-    if (FIELD_EX32(s->cfgr, CFGR, SWS) == 0b01 ||
+    if (FIELD_EX32(s->cfgr, CFGR, SWS) == 0b00 ||
         current_pll_src == RCC_CLOCK_MUX_SRC_HSI) {
         s->cr |= (R_CR_HSION_MASK | R_CR_HSIRDY_MASK);
         clock_update_hz(s->hsi16_rc, HSI_FRQ);
-        if (s->cier & R_CIER_HSIRDYIE_MASK) {
-            s->cifr |= R_CIFR_HSIRDYF_MASK;
+        if (s->cier & R_CIR_HSIRDYIE_MASK) {
+            s->cifr |= R_CIR_HSIRDYF_MASK;
         }
     } else {
         val = FIELD_EX32(s->cr, CR, HSION);
         if (val) {
             clock_update_hz(s->hsi16_rc, HSI_FRQ);
             s->cr |= R_CR_HSIRDY_MASK;
-            if (s->cier & R_CIER_HSIRDYIE_MASK) {
-                s->cifr |= R_CIFR_HSIRDYF_MASK;
+            if (s->cier & R_CIR_HSIRDYIE_MASK) {
+                s->cifr |= R_CIR_HSIRDYF_MASK;
             }
         } else {
             clock_update(s->hsi16_rc, 0);
             s->cr &= ~R_CR_HSIRDY_MASK;
         }
     }
-#endif
     rcc_update_irq(s);
 }
 
