@@ -406,8 +406,8 @@ static void rcc_update_cr_register(STM32F4XXRCCState *s, uint32_t previous_value
         pll_set_enable(&s->plls[RCC_PLL_PLL], val);
         s->cr = (s->cr & ~R_CR_PLLRDY_MASK) |
                 (val << R_CR_PLLRDY_SHIFT);
-        if (s->cier & R_CIR_PLLRDYIE_MASK) {
-            s->cifr |= R_CIR_PLLRDYF_MASK;
+        if (s->cir & R_CIR_PLLRDYIE_MASK) {
+            s->cir |= R_CIR_PLLRDYF_MASK;
         }
     } else {
         s->cr |= R_CR_PLLON_MASK;
@@ -428,8 +428,8 @@ static void rcc_update_cr_register(STM32F4XXRCCState *s, uint32_t previous_value
                 (val << R_CR_HSERDY_SHIFT);
         if (val) {
             clock_update_hz(s->hse, s->hse_frequency);
-            if (s->cier & R_CIR_HSERDYIE_MASK) {
-                s->cifr |= R_CIR_HSERDYF_MASK;
+            if (s->cir & R_CIR_HSERDYIE_MASK) {
+                s->cir |= R_CIR_HSERDYF_MASK;
             }
         } else {
             clock_update(s->hse, 0);
@@ -450,16 +450,16 @@ static void rcc_update_cr_register(STM32F4XXRCCState *s, uint32_t previous_value
         current_pll_src == RCC_CLOCK_MUX_SRC_HSI) {
         s->cr |= (R_CR_HSION_MASK | R_CR_HSIRDY_MASK);
         clock_update_hz(s->hsi16_rc, HSI_FRQ);
-        if (s->cier & R_CIR_HSIRDYIE_MASK) {
-            s->cifr |= R_CIR_HSIRDYF_MASK;
+        if (s->cir & R_CIR_HSIRDYIE_MASK) {
+            s->cir |= R_CIR_HSIRDYF_MASK;
         }
     } else {
         val = FIELD_EX32(s->cr, CR, HSION);
         if (val) {
             clock_update_hz(s->hsi16_rc, HSI_FRQ);
             s->cr |= R_CR_HSIRDY_MASK;
-            if (s->cier & R_CIR_HSIRDYIE_MASK) {
-                s->cifr |= R_CIR_HSIRDYF_MASK;
+            if (s->cir & R_CIR_HSIRDYIE_MASK) {
+                s->cir |= R_CIR_HSIRDYF_MASK;
             }
         } else {
             clock_update(s->hsi16_rc, 0);
@@ -659,19 +659,12 @@ static void rcc_update_apb2enr(STM32F4XXRCCState *s)
  * so we can use the same function for all of them
  * Note: no frequency bounds checking is done here.
  */
-static void rcc_update_pllsaixcfgr(STM32F4XXRCCState *s, RccPll pll_id)
+static void rcc_update_pllcfgr(STM32F4XXRCCState *s, RccPll pll_id)
 {
-#if 0
     uint32_t reg, val;
     switch (pll_id) {
     case RCC_PLL_PLL:
         reg = s->pllcfgr;
-        break;
-    case RCC_PLL_PLLSAI1:
-        reg = s->pllsai1cfgr;
-        break;
-    case RCC_PLL_PLLSAI2:
-        reg = s->pllsai2cfgr;
         break;
     default:
         qemu_log_mask(LOG_GUEST_ERROR,
@@ -679,111 +672,31 @@ static void rcc_update_pllsaixcfgr(STM32F4XXRCCState *s, RccPll pll_id)
         return;
     }
 
-    /* PLLPDIV */
-    val = FIELD_EX32(reg, PLLCFGR, PLLPDIV);
-    /* 1 is a reserved value */
-    if (val == 0) {
-        /* Get PLLP value */
-        val = FIELD_EX32(reg, PLLCFGR, PLLP);
-        pll_set_channel_divider(&s->plls[pll_id], RCC_PLL_COMMON_CHANNEL_P,
-            (val ? 17 : 7));
-    } else if (val > 1) {
-        pll_set_channel_divider(&s->plls[pll_id], RCC_PLL_COMMON_CHANNEL_P,
-            val);
-    }
-
-
-    /* PLLR */
-    val = FIELD_EX32(reg, PLLCFGR, PLLR);
-    pll_set_channel_divider(&s->plls[pll_id], RCC_PLL_COMMON_CHANNEL_R,
-        2 * (val + 1));
-
-    /* PLLREN */
-    val = FIELD_EX32(reg, PLLCFGR, PLLREN);
-    pll_set_channel_enable(&s->plls[pll_id], RCC_PLL_COMMON_CHANNEL_R, val);
-
     /* PLLQ */
     val = FIELD_EX32(reg, PLLCFGR, PLLQ);
-    pll_set_channel_divider(&s->plls[pll_id], RCC_PLL_COMMON_CHANNEL_Q,
-        2 * (val + 1));
+    pll_set_channel_divider(&s->plls[pll_id], RCC_PLL_COMMON_CHANNEL_Q, val);
 
-    /* PLLQEN */
-    val = FIELD_EX32(reg, PLLCFGR, PLLQEN);
-    pll_set_channel_enable(&s->plls[pll_id], RCC_PLL_COMMON_CHANNEL_Q, val);
+    /* PLLSRC */
+    val = FIELD_EX32(s->pllcfgr, PLLCFGR, PLLSRC);
+    clock_mux_set_source(&s->clock_muxes[RCC_CLOCK_MUX_PLL_INPUT], val);
+    clock_mux_set_enable(&s->clock_muxes[RCC_CLOCK_MUX_PLL_INPUT], true);
 
-    /* PLLPEN */
-    val = FIELD_EX32(reg, PLLCFGR, PLLPEN);
-    pll_set_channel_enable(&s->plls[pll_id], RCC_PLL_COMMON_CHANNEL_P, val);
+    /* PLLP */
+    val = FIELD_EX32(reg, PLLCFGR, PLLP);
+    pll_set_channel_enable(&s->plls[pll_id], RCC_PLL_COMMON_CHANNEL_P, 2 * (val + 1));
 
     /* PLLN */
     val = FIELD_EX32(reg, PLLCFGR, PLLN);
     pll_set_vco_multiplier(&s->plls[pll_id], val);
-#endif
-}
-
-static void rcc_update_pllcfgr(STM32F4XXRCCState *s)
-{
-#if 0
-    int val;
-
-    /* Use common layout */
-    rcc_update_pllsaixcfgr(s, RCC_PLL_PLL);
-
-    /* Fetch specific fields for pllcfgr */
 
     /* PLLM */
     val = FIELD_EX32(s->pllcfgr, PLLCFGR, PLLM);
-    clock_mux_set_factor(&s->clock_muxes[RCC_CLOCK_MUX_PLL_INPUT], 1, (val + 1));
-
-    /* PLLSRC */
-    val = FIELD_EX32(s->pllcfgr, PLLCFGR, PLLSRC);
-    if (val == 0) {
-        clock_mux_set_enable(&s->clock_muxes[RCC_CLOCK_MUX_PLL_INPUT], false);
-    } else {
-        clock_mux_set_source(&s->clock_muxes[RCC_CLOCK_MUX_PLL_INPUT], val - 1);
-        clock_mux_set_enable(&s->clock_muxes[RCC_CLOCK_MUX_PLL_INPUT], true);
-    }
-#endif
-}
-
-static void rcc_update_ccipr(STM32F4XXRCCState *s)
-{
-    #define CCIPR_SET_SOURCE(_peripheral_name) \
-        clock_mux_set_source(&s->clock_muxes[RCC_CLOCK_MUX_##_peripheral_name], \
-            FIELD_EX32(s->ccipr, CCIPR, _peripheral_name##SEL))
-#if 0
-    CCIPR_SET_SOURCE(DFSDM1);
-    CCIPR_SET_SOURCE(SWPMI1);
-    CCIPR_SET_SOURCE(ADC);
-    CCIPR_SET_SOURCE(CLK48);
-    CCIPR_SET_SOURCE(SAI2);
-    CCIPR_SET_SOURCE(SAI1);
-    CCIPR_SET_SOURCE(LPTIM2);
-    CCIPR_SET_SOURCE(LPTIM1);
-    CCIPR_SET_SOURCE(I2C3);
-    CCIPR_SET_SOURCE(I2C2);
-    CCIPR_SET_SOURCE(I2C1);
-    CCIPR_SET_SOURCE(LPUART1);
-    CCIPR_SET_SOURCE(UART5);
-    CCIPR_SET_SOURCE(UART4);
-    CCIPR_SET_SOURCE(USART3);
-    CCIPR_SET_SOURCE(USART2);
-    CCIPR_SET_SOURCE(USART1);
-#endif
-    #undef CCIPR_SET_SOURCE
+    clock_mux_set_factor(&s->clock_muxes[RCC_CLOCK_MUX_PLL_INPUT], 1, val);
 }
 
 static void rcc_update_bdcr(STM32F4XXRCCState *s)
 {
-#if 0
     int val;
-
-    /* LSCOSEL */
-    val = FIELD_EX32(s->bdcr, BDCR, LSCOSEL);
-    clock_mux_set_source(&s->clock_muxes[RCC_CLOCK_MUX_LSCO], val);
-
-    val = FIELD_EX32(s->bdcr, BDCR, LSCOEN);
-    clock_mux_set_enable(&s->clock_muxes[RCC_CLOCK_MUX_LSCO], val);
 
     /* BDRST */
     /*
@@ -797,8 +710,6 @@ static void rcc_update_bdcr(STM32F4XXRCCState *s)
     val = FIELD_EX32(s->bdcr, BDCR, RTCSEL);
     clock_mux_set_source(&s->clock_muxes[RCC_CLOCK_MUX_RTC_COMMON], val);
 
-    /* LSECSSON */
-    /* LSEDRV[1:0] */
     /* LSEBYP */
 
     /* LSEON: Update LSERDY at the same time */
@@ -806,20 +717,18 @@ static void rcc_update_bdcr(STM32F4XXRCCState *s)
     if (val) {
         clock_update_hz(s->lse_crystal, LSE_FRQ);
         s->bdcr |= R_BDCR_LSERDY_MASK;
-        if (s->cier & R_CIER_LSERDYIE_MASK) {
-            s->cifr |= R_CIFR_LSERDYF_MASK;
+        if (s->cir & R_CIR_LSERDYIE_MASK) {
+            s->cir |= R_CIR_LSERDYF_MASK;
         }
     } else {
         clock_update(s->lse_crystal, 0);
         s->bdcr &= ~R_BDCR_LSERDY_MASK;
     }
     rcc_update_irq(s);
-#endif
 }
 
 static void rcc_update_csr(STM32F4XXRCCState *s)
 {
-#if 0
     int val;
 
     /* Reset flags: Not implemented */
@@ -830,8 +739,8 @@ static void rcc_update_csr(STM32F4XXRCCState *s)
     if (val) {
         clock_update_hz(s->lsi_rc, LSI_FRQ);
         s->csr |= R_CSR_LSIRDY_MASK;
-        if (s->cier & R_CIER_LSIRDYIE_MASK) {
-            s->cifr |= R_CIFR_LSIRDYF_MASK;
+        if (s->cir & R_CIR_LSIRDYIE_MASK) {
+            s->cir |= R_CIR_LSIRDYF_MASK;
         }
     } else {
         /*
@@ -843,7 +752,6 @@ static void rcc_update_csr(STM32F4XXRCCState *s)
         s->csr &= ~R_CSR_LSIRDY_MASK;
     }
     rcc_update_irq(s);
-#endif
 }
 
 static void stm32f4xx_rcc_reset_hold(Object *obj)
@@ -1261,11 +1169,7 @@ static void stm32f4xx_rcc_realize(DeviceState *dev, Error **errp)
      * Start clocks after everything is connected
      * to propagate the frequencies along the tree.
      */
-#if 0
-    clock_update_hz(s->msi_rc, MSI_DEFAULT_FRQ);
-    clock_update_hz(s->sai1_extclk, s->sai1_extclk_frequency);
-    clock_update_hz(s->sai2_extclk, s->sai2_extclk_frequency);
-#endif
+    clock_update_hz(s->i2s_extclk, s->i2s_extclk_frequency);
     clock_update(s->gnd, 0);
 }
 
