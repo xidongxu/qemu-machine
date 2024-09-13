@@ -471,26 +471,35 @@ static void rcc_update_cr_register(STM32F4XXRCCState *s, uint32_t previous_value
 
 static void rcc_update_cfgr_register(STM32F4XXRCCState *s)
 {
-#if 0
     uint32_t val;
-    /* MCOPRE */
-    val = FIELD_EX32(s->cfgr, CFGR, MCOPRE);
-    assert(val <= 0b100);
-    clock_mux_set_factor(&s->clock_muxes[RCC_CLOCK_MUX_MCO],
-                         1, 1 << val);
-
-    /* MCOSEL */
-    val = FIELD_EX32(s->cfgr, CFGR, MCOSEL);
+    /* MCO2PRE */
+    val = FIELD_EX32(s->cfgr, CFGR, MCO2PRE);
     assert(val <= 0b111);
-    if (val == 0) {
-        clock_mux_set_enable(&s->clock_muxes[RCC_CLOCK_MUX_MCO], false);
-    } else {
-        clock_mux_set_enable(&s->clock_muxes[RCC_CLOCK_MUX_MCO], true);
-        clock_mux_set_source(&s->clock_muxes[RCC_CLOCK_MUX_MCO],
-                             val - 1);
-    }
+    clock_mux_set_factor(&s->clock_muxes[RCC_CLOCK_MUX_MCO2],
+                         1, val - 2);
 
-    /* STOPWUCK */
+    /* MCO2 */
+    val = FIELD_EX32(s->cfgr, CFGR, MCO2);
+    assert(val <= 0b11);
+    clock_mux_set_enable(&s->clock_muxes[RCC_CLOCK_MUX_MCO2], true);
+    clock_mux_set_source(&s->clock_muxes[RCC_CLOCK_MUX_MCO2],
+                         val - 1);
+
+    /* MCO1PRE */
+    val = FIELD_EX32(s->cfgr, CFGR, MCO1PRE);
+    assert(val <= 0b111);
+    clock_mux_set_factor(&s->clock_muxes[RCC_CLOCK_MUX_MCO1],
+                         1, val - 2);
+
+    /* MCO1 */
+    val = FIELD_EX32(s->cfgr, CFGR, MCO1);
+    assert(val <= 0b11);
+    clock_mux_set_enable(&s->clock_muxes[RCC_CLOCK_MUX_MCO1], true);
+    clock_mux_set_source(&s->clock_muxes[RCC_CLOCK_MUX_MCO1],
+                         val - 1);
+
+    /* I2SSRC */
+    /* RTCPRE */
     /* TODO */
 
     /* PPRE2 */
@@ -529,7 +538,6 @@ static void rcc_update_cfgr_register(STM32F4XXRCCState *s)
                          val);
     s->cfgr &= ~R_CFGR_SWS_MASK;
     s->cfgr |= val << R_CFGR_SWS_SHIFT;
-#endif
 }
 
 static void rcc_update_ahb1enr(STM32F4XXRCCState *s)
