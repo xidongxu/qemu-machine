@@ -449,20 +449,20 @@ static void rcc_update_cr_register(STM32F4XXRCCState *s, uint32_t previous_value
     if (FIELD_EX32(s->cfgr, CFGR, SWS) == 0b00 ||
         current_pll_src == RCC_CLOCK_MUX_SRC_HSI) {
         s->cr |= (R_CR_HSION_MASK | R_CR_HSIRDY_MASK);
-        clock_update_hz(s->hsi16_rc, HSI_FRQ);
+        clock_update_hz(s->hsi_rc, HSI_FRQ);
         if (s->cir & R_CIR_HSIRDYIE_MASK) {
             s->cir |= R_CIR_HSIRDYF_MASK;
         }
     } else {
         val = FIELD_EX32(s->cr, CR, HSION);
         if (val) {
-            clock_update_hz(s->hsi16_rc, HSI_FRQ);
+            clock_update_hz(s->hsi_rc, HSI_FRQ);
             s->cr |= R_CR_HSIRDY_MASK;
             if (s->cir & R_CIR_HSIRDYIE_MASK) {
                 s->cir |= R_CIR_HSIRDYF_MASK;
             }
         } else {
-            clock_update(s->hsi16_rc, 0);
+            clock_update(s->hsi_rc, 0);
             s->cr &= ~R_CR_HSIRDY_MASK;
         }
     }
@@ -675,6 +675,7 @@ static void rcc_update_pllcfgr(STM32F4XXRCCState *s, RccPll pll_id)
     /* PLLQ */
     val = FIELD_EX32(reg, PLLCFGR, PLLQ);
     pll_set_channel_divider(&s->plls[pll_id], RCC_PLL_COMMON_CHANNEL_Q, val);
+    pll_set_channel_enable(&s->plls[pll_id], RCC_PLL_COMMON_CHANNEL_Q, true);
 
     /* PLLSRC */
     val = FIELD_EX32(s->pllcfgr, PLLCFGR, PLLSRC);
@@ -683,7 +684,8 @@ static void rcc_update_pllcfgr(STM32F4XXRCCState *s, RccPll pll_id)
 
     /* PLLP */
     val = FIELD_EX32(reg, PLLCFGR, PLLP);
-    pll_set_channel_enable(&s->plls[pll_id], RCC_PLL_COMMON_CHANNEL_P, 2 * (val + 1));
+    pll_set_channel_divider(&s->plls[pll_id], RCC_PLL_COMMON_CHANNEL_P, 2 * (val + 1));
+    pll_set_channel_enable(&s->plls[pll_id], RCC_PLL_COMMON_CHANNEL_P, true);
 
     /* PLLN */
     val = FIELD_EX32(reg, PLLCFGR, PLLN);
@@ -715,13 +717,13 @@ static void rcc_update_bdcr(STM32F4XXRCCState *s)
     /* LSEON: Update LSERDY at the same time */
     val = FIELD_EX32(s->bdcr, BDCR, LSEON);
     if (val) {
-        clock_update_hz(s->lse_crystal, LSE_FRQ);
+        clock_update_hz(s->lse, LSE_FRQ);
         s->bdcr |= R_BDCR_LSERDY_MASK;
         if (s->cir & R_CIR_LSERDYIE_MASK) {
             s->cir |= R_CIR_LSERDYF_MASK;
         }
     } else {
-        clock_update(s->lse_crystal, 0);
+        clock_update(s->lse, 0);
         s->bdcr &= ~R_BDCR_LSERDY_MASK;
     }
     rcc_update_irq(s);
@@ -892,7 +894,7 @@ static void stm32f4xx_rcc_write(void *opaque, hwaddr addr,
         break;
     case A_PLLCFGR:
         s->pllcfgr = value;
-        rcc_update_pllcfgr(s);
+        rcc_update_pllcfgr(s, RCC_PLL_PLL);
         break;
     case A_CFGR:
         s->cfgr = value & ~CFGR_RO_MASK;
