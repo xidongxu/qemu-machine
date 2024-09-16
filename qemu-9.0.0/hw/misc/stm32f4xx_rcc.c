@@ -310,7 +310,7 @@ static void pll_set_vco_multiplier(RccPllState *pll, uint32_t vco_multiplier)
         return;
     }
 
-    if (vco_multiplier < 8 || vco_multiplier > 86) {
+    if (vco_multiplier < 50 || vco_multiplier > 432) {
         qemu_log_mask(LOG_GUEST_ERROR,
             "%s: VCO multiplier is out of bound (%u) for PLL %u\n",
             __func__, vco_multiplier, pll->id);
