@@ -484,19 +484,19 @@ NOTE: The object files are built at the place where configure is launched
 ###  方式1：使用工程自带源码
 
 ```shell
-../qemu-9.0.0/configure --prefix=/C/Users/xidon/code/github/qemu-machine/qemu-build --target-list=arm-softmmu
+../qemu-9.0.0/configure --prefix=/C/Users/xidon/code/github/qemu-machine/qemu-build --target-list=arm-softmmu --enable-debug
 ```
 
 ### 方式2：使用其它版本源码
 
 ```shell
-../qemu-版本号/configure --prefix=/C/Users/xidon/code/github/qemu-machine/qemu-build --target-list=arm-softmmu
+../qemu-版本号/configure --prefix=/C/Users/xidon/code/github/qemu-machine/qemu-build --target-list=arm-softmmu --enable-debug
 ```
 
 ### 方式3：使用官方最新源码
 
 ``` shell
-../qemu/configure --prefix=/C/Users/xidon/code/github/qemu-machine/qemu-build --target-list=arm-softmmu
+../qemu/configure --prefix=/C/Users/xidon/code/github/qemu-machine/qemu-build --target-list=arm-softmmu --enable-debug
 ```
 
 
