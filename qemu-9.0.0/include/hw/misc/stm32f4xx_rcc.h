@@ -46,7 +46,8 @@ typedef enum RccClockMux {
     RCC_CLOCK_MUX_HSE_RTC,
     RCC_CLOCK_MUX_RTC_COMMON,
 
-    RCC_CLOCK_MUX_CORTEX_SYSTEM_TIMER,
+    /* Muxes with a publicly available output */
+    RCC_CLOCK_MUX_CORTEX_REFCLK,
     RCC_CLOCK_MUX_MCO1,
     RCC_CLOCK_MUX_MCO2,
     RCC_CLOCK_MUX_I2S,
@@ -133,6 +134,7 @@ typedef enum RccClockMux {
 
     /* - OTHER */
     RCC_CLOCK_MUX_SSCG,
+    RCC_CLOCK_MUX_CORTEX_FCLK,
 
     RCC_NUM_CLOCK_MUX
 } RccClockMux;

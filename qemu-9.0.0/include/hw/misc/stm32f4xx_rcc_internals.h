@@ -797,8 +797,9 @@ static const ClockMuxInitInfo CLOCK_MUX_INIT_INFO[] = {
         .hidden = true,
         FILL_DEFAULT_INIT_ENABLED,
     },
-    [RCC_CLOCK_MUX_CORTEX_SYSTEM_TIMER] = {
-        .name = "cortex-system-timer",
+    /* From now on, muxes with a publicly available output */
+    [RCC_CLOCK_MUX_CORTEX_REFCLK] = {
+        .name = "cortex-refclk",
         .multiplier = 1,
         /* TIMER is always HCLK/8 */
         .divider = 8,
@@ -1287,6 +1288,13 @@ static const ClockMuxInitInfo CLOCK_MUX_INIT_INFO[] = {
         .name = "sscg",
         .src_mapping = {
             RCC_CLOCK_MUX_SRC_PLL,
+        },
+        FILL_DEFAULT_INIT_ENABLED,
+    },
+    [RCC_CLOCK_MUX_CORTEX_FCLK] = {
+        .name = "cortex-fclk",
+        .src_mapping = {
+            RCC_CLOCK_MUX_SRC_HCLK,
         },
         FILL_DEFAULT_INIT_ENABLED,
     },

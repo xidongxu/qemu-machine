@@ -31,9 +31,8 @@
 #include "hw/registerfields.h"
 #include "trace.h"
 
-#define HSE_DEFAULT_FRQ 48000000ULL
+#define HSE_DEFAULT_FRQ 8000000ULL
 #define HSI_FRQ 16000000ULL
-#define MSI_DEFAULT_FRQ 4000000ULL
 #define LSE_FRQ 32768ULL
 #define LSI_FRQ 32000ULL
 
@@ -1140,9 +1139,9 @@ static void stm32f4xx_rcc_realize(DeviceState *dev, Error **errp)
     size_t i;
 
     if (s->hse_frequency <  4000000ULL ||
-        s->hse_frequency > 48000000ULL) {
+        s->hse_frequency > 26000000ULL) {
             error_setg(errp,
-                "HSE frequency is outside of the allowed [4-48]Mhz range: %" PRIx64 "",
+                "HSE frequency is outside of the allowed [4-26]Mhz range: %" PRIx64 "",
                 s->hse_frequency);
             return;
         }
