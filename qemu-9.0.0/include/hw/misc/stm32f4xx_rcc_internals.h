@@ -786,7 +786,7 @@ static const ClockMuxInitInfo CLOCK_MUX_INIT_INFO[] = {
         .hidden = true,
     },
     [RCC_CLOCK_MUX_RTC_COMMON] = {
-        .name = "rtc",
+        .name = "rtc-common",
         /* Same mapping as: BDCR_RTCSEL */
         .src_mapping = {
             RCC_CLOCK_MUX_SRC_GND,
