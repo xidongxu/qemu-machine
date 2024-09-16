@@ -474,29 +474,26 @@ static void rcc_update_cfgr_register(STM32F4XXRCCState *s)
     uint32_t val;
     /* MCO2PRE */
     val = FIELD_EX32(s->cfgr, CFGR, MCO2PRE);
-    if (val >= 0b010 && val <=0b111)
-    {
+    if (val >= 0b010 && val <=0b111) {
         clock_mux_set_factor(&s->clock_muxes[RCC_CLOCK_MUX_MCO2],
                              1, val - 2);
     }
     /* MCO2 */
     val = FIELD_EX32(s->cfgr, CFGR, MCO2);
-    if (val <= 0b11)
-    {
+    if (val <= 0b11) {
         clock_mux_set_enable(&s->clock_muxes[RCC_CLOCK_MUX_MCO2], true);
         clock_mux_set_source(&s->clock_muxes[RCC_CLOCK_MUX_MCO2],
                              val);
     }
     /* MCO1PRE */
     val = FIELD_EX32(s->cfgr, CFGR, MCO1PRE);
-    if (val >= 0b010 && val <=0b111)
+    if (val >= 0b010 && val <=0b111) {
         clock_mux_set_factor(&s->clock_muxes[RCC_CLOCK_MUX_MCO1],
                              1, val - 2);
     }
     /* MCO1 */
     val = FIELD_EX32(s->cfgr, CFGR, MCO1);
-    if (val <= 0b11)
-    {
+    if (val <= 0b11) {
         clock_mux_set_enable(&s->clock_muxes[RCC_CLOCK_MUX_MCO1], true);
         clock_mux_set_source(&s->clock_muxes[RCC_CLOCK_MUX_MCO1],
                              val);
