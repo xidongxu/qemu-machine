@@ -26,7 +26,7 @@
 #define HW_ARM_STM32F405_SOC_H
 
 #include "hw/misc/stm32f4xx_syscfg.h"
-#include "hw/timer/stm32f2xx_timer.h"
+#include "hw/timer/stm32f4xx_timer.h"
 #include "hw/char/stm32f2xx_usart.h"
 #include "hw/adc/stm32f2xx_adc.h"
 #include "hw/misc/stm32f4xx_exti.h"
@@ -59,7 +59,7 @@ struct STM32F405State {
     STM32F4xxSyscfgState syscfg;
     STM32F4xxExtiState exti;
     STM32F2XXUsartState usart[STM_NUM_USARTS];
-    STM32F2XXTimerState timer[STM_NUM_TIMERS];
+    STM32F4XXTimerState timer[STM_NUM_TIMERS];
     OrIRQState adc_irqs;
     STM32F2XXADCState adc[STM_NUM_ADCS];
     STM32F2XXSPIState spi[STM_NUM_SPIS];
