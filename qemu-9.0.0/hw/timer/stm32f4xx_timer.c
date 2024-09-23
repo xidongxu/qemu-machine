@@ -82,8 +82,10 @@ static void stm32f4xx_timer_set_alarm(STM32F4XXTimerState *s, int64_t now)
 
     DB_PRINT("Alarm set at: 0x%x\n", s->tim_cr1);
 
-    now_ticks = stm32f4xx_ns_to_ticks(s, now);
-    ticks = s->tim_arr - (now_ticks - s->tick_offset);
+    // now_ticks = stm32f4xx_ns_to_ticks(s, now);
+    // ticks = s->tim_arr - (now_ticks - s->tick_offset);
+    now_ticks = 0;
+    ticks = s->tim_arr;
 
     DB_PRINT("Alarm set in %d ticks\n", (int) ticks);
 
